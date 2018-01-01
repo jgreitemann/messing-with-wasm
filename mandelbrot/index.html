@@ -9,10 +9,17 @@
         <script type="text/javascript" src="spinner.js"></script>
         <script type="text/javascript" src="mandelbrot_module.js"></script>
         <script async type="text/javascript" src="mandelbrot.js"></script>
-        <div id="layers">
-            <canvas id="canvas" class="layer" width="981" height="561"></canvas>
-            <div id="spinner_layer" class="layer">
-                <img id="spinner" src="spinner.gif" />
+        <div id="content">
+            <div id="layers">
+                <canvas id="canvas" class="layer" width="981" height="561"></canvas>
+                <div id="spinner_layer" class="layer">
+                    <img id="spinner" src="spinner.gif" />
+                </div>
+            </div>
+            <div id="ui">
+                <select id="palette_picker" disabled>
+                    <option selected>&lt;select color palette&gt;</option>
+                </select>
             </div>
         </div>
     </body>

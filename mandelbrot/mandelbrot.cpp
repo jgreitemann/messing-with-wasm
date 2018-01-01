@@ -6,6 +6,7 @@
 #include <iostream>
 #include <sstream>
 #include <utility>
+#include <vector>
 
 
 #include <fstream>
@@ -20,10 +21,28 @@ uint8_t * write_px (Color const& px, uint8_t * d) {
     return std::copy(str.begin(), str.end(), d);
 }
 
+std::vector<std::string> palette_names;
+
 
 extern "C" {
 
-    void mandelbrot (int width, int height, uint8_t * data) {
+    int main () {
+        // prep palette names
+        for (auto pair : color::palettes) {
+            std::string const& name = pair.first;
+            palette_names.push_back(name);
+        }
+    }
+
+    int get_number_of_palettes () {
+        return palette_names.size();
+    }
+
+    char const * get_palette_name (int idx) {
+        return palette_names[idx].c_str();
+    }
+
+    void mandelbrot (int width, int height, uint8_t * data, int pal_idx) {
         size_t max_it = 1000;
         double bail_out = std::pow(2, 16);
         auto dim = std::make_pair(width, height);
@@ -31,7 +50,7 @@ extern "C" {
         auto delta = std::make_pair((canvas.first.second - canvas.first.first)/(dim.first-1),
                                     (canvas.second.second - canvas.second.first)/(dim.second-1));
         auto func = [] (double x) { return pow(x, 0.1); };
-        auto pal = color::palettes.at("inferno").rescale(1, func(max_it));
+        auto pal = color::palettes.at(palette_names[pal_idx]).rescale(1, func(max_it));
         auto black = pal(0.);
 
         for (size_t j = 0; j < dim.second; ++j) {
