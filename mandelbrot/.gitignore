@@ -1,4 +1,4 @@
-*.js
-*.wasm
+mandelbrot.js
+mandelbrot.wasm
 *.o
 a.out

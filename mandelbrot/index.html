@@ -3,51 +3,17 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-        <style type="text/css">
-         #canvas {
-             display:block;
-             margin-left:auto;
-             margin-right:auto;
-         }
-        </style>
+        <link rel="stylesheet" type="text/css" href="style.css" />
     </head>
     <body>
-        <script type="text/javascript">
-
-         var Module = {
-             preRun: [],
-             postRun: function () {
-                 var mandelbrot = Module.cwrap('mandelbrot', null, ['number', 'number', 'number']);
-
-                 var canvas = document.getElementById('canvas');
-                 var ctx = canvas.getContext('2d');
-                 var width = canvas.width;
-                 var height = canvas.height;
-                 var imageData = ctx.createImageData(width, height);
-
-                 var px_data = Module._malloc(width * height * 4);
-
-                 var refresh_canvas = function () {
-                     mandelbrot(width, height, px_data);
-
-                     var data = imageData.data;
-
-                     for (var i = 0; i < data.length; i++) {
-                         var x = Module.getValue(px_data + i, 'i8');
-                         // convert from signed to unsigned
-                         if (x < 0) x += 256;
-                         data[i] = x;
-                     }
-
-                     ctx.putImageData(imageData, 0, 0);
-                 }
-
-                 refresh_canvas();
-             },
-             totalDependencies: 0
-         };
-        </script>
+        <script type="text/javascript" src="spinner.js"></script>
+        <script type="text/javascript" src="mandelbrot_module.js"></script>
         <script async type="text/javascript" src="mandelbrot.js"></script>
-        <canvas width="981" height="561" id="canvas"></canvas>
+        <div id="layers">
+            <canvas id="canvas" class="layer" width="981" height="561"></canvas>
+            <div id="spinner_layer" class="layer">
+                <img id="spinner" src="spinner.gif" />
+            </div>
+        </div>
     </body>
 </html>
