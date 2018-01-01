@@ -29,21 +29,23 @@ var Module = {
         var refresh_canvas = function () {
             show_spinner();
 
-            // perform calculation (WASM)
-            mandelbrot(width, height, px_data, selected_pal);
-
             var data = imageData.data;
 
-            for (var i = 0; i < data.length; i++) {
-                var x = Module.getValue(px_data + i, 'i8');
-                // convert from signed to unsigned
-                if (x < 0) x += 256;
-                data[i] = x;
-            }
+            // perform calculation (WASM)
+            setTimeout(function () {
+                mandelbrot(width, height, px_data, selected_pal);
 
-            ctx.putImageData(imageData, 0, 0);
+                for (var i = 0; i < data.length; i++) {
+                    var x = Module.getValue(px_data + i, 'i8');
+                    // convert from signed to unsigned
+                    if (x < 0) x += 256;
+                    data[i] = x;
+                }
 
-            hide_spinner();
+                ctx.putImageData(imageData, 0, 0);
+
+                hide_spinner();
+            }, 100);
         };
 
         refresh_canvas();
