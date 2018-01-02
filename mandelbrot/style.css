@@ -28,6 +28,10 @@
     transform: translateY(-50%);
 }
 
+#selection {
+    opacity: 0.5;
+}
+
 #ui {
     width: 981px;
     margin-top: 1em;

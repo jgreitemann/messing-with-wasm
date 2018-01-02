@@ -7,7 +7,7 @@ CAT = cat
 EMRUN = source ~/opensource/emsdk/emsdk_env.sh && emrun
 EMCC = source ~/opensource/emsdk/emsdk_env.sh && emcc
 EM_EXEX = -s 'EXTRA_EXPORTED_RUNTIME_METHODS=["ccall", "cwrap", "getValue", "setValue"]'
-EM_EX = -s EXPORTED_FUNCTIONS='["_mandelbrot", "_main", "_get_number_of_palettes", "_get_palette_name"]'
+EM_EX = -s EXPORTED_FUNCTIONS='["_mandelbrot", "_main", "_get_number_of_palettes", "_get_palette_name", "_set_viewport"]'
 
 INCLUDES = -I../thirdparty/svm-order-params/colormap 
 CXXFLAGS = -std=c++11 -O3

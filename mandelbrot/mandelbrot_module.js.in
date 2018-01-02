@@ -35,6 +35,13 @@ var Module = {
                     action: 'render-canvas',
                     imageData: msg.imageData
                 });
+            } else if (msg.action == 'update-viewport') {
+                Module.ccall('set_viewport', null,
+                             ['number', 'number', 'number', 'number'],
+                             msg.rel_rect);
+                postMessage({
+                    action: 'viewport-updated'
+                });
             }
         };
     },

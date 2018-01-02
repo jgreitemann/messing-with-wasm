@@ -23,6 +23,7 @@ uint8_t * write_px (Color const& px, uint8_t * d) {
 
 std::vector<std::string> palette_names;
 
+auto viewport = std::make_pair(std::make_pair(-2.5,1.), std::make_pair(-1.,1.));
 
 extern "C" {
 
@@ -42,21 +43,29 @@ extern "C" {
         return palette_names[idx].c_str();
     }
 
+    void set_viewport(double x0, double y0, double x1, double y1) {
+        viewport = std::make_pair(
+            std::make_pair(viewport.first.first + std::min(x0, x1) * (viewport.first.second - viewport.first.first),
+                           viewport.first.first + std::max(x0, x1) * (viewport.first.second - viewport.first.first)),
+            std::make_pair(viewport.second.first + std::min(y0, y1) * (viewport.second.second - viewport.second.first),
+                           viewport.second.first + std::max(y0, y1) * (viewport.second.second - viewport.second.first))
+            );
+    }
+
     void mandelbrot (int width, int height, uint8_t * data, int pal_idx) {
         size_t max_it = 1000;
         double bail_out = std::pow(2, 16);
         auto dim = std::make_pair(width, height);
-        auto canvas = std::make_pair(std::make_pair(-2.5,1.), std::make_pair(-1.,1.));
-        auto delta = std::make_pair((canvas.first.second - canvas.first.first)/(dim.first-1),
-                                    (canvas.second.second - canvas.second.first)/(dim.second-1));
+        auto delta = std::make_pair((viewport.first.second - viewport.first.first)/(dim.first-1),
+                                    (viewport.second.second - viewport.second.first)/(dim.second-1));
         auto func = [] (double x) { return pow(x, 0.1); };
         auto pal = color::palettes.at(palette_names[pal_idx]).rescale(1, func(max_it));
         auto black = pal(0.);
 
         for (size_t j = 0; j < dim.second; ++j) {
             for (size_t i = 0; i < dim.first; ++i) {
-                std::complex<double> c = {canvas.first.first + i * delta.first,
-                                          canvas.second.first + j * delta.second};
+                std::complex<double> c = {viewport.first.first + i * delta.first,
+                                          viewport.second.first + j * delta.second};
                 std::complex<double> z = 0.;
                 size_t it;
                 for (it = 0; it < max_it && std::norm(z) < bail_out; ++it)
