@@ -2,6 +2,7 @@
 
 MKDIR = mkdir -p
 GIT = git
+CAT = cat
 
 EMRUN = source ~/opensource/emsdk/emsdk_env.sh && emrun
 EMCC = source ~/opensource/emsdk/emsdk_env.sh && emcc
@@ -12,7 +13,7 @@ INCLUDES = -I../thirdparty/svm-order-params/colormap
 CXXFLAGS = -std=c++11 -O3
 
 HTML = index.html
-JS = mandelbrot.js
+JS = mandelbrot.js mandelbrot_module.js
 WASM = $(JS:.js=.wasm)
 
 all: $(HTML) $(JS)
@@ -23,8 +24,11 @@ serve: $(HTML) $(JS)
 clean:
 		$(RM) $(JS) $(WASM)
 
-%.js: %.cpp ../thirdparty/svm-order-params
+mandelbrot.js: mandelbrot.cpp ../thirdparty/svm-order-params
 		$(EMCC) $(CXXFLAGS) $(INCLUDES) $< -s WASM=1 $(EM_EX) $(EM_EXEX) -o $@
+
+mandelbrot_module.js: mandelbrot_module.js.in mandelbrot.js
+		$(CAT) $^ > $@
 
 ../thirdparty:
 		$(MKDIR) ../thirdparty
