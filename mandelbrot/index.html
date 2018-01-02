@@ -17,9 +17,16 @@
                 </div>
             </div>
             <div id="ui">
-                <select id="palette_picker" disabled>
-                    <option selected>&lt;select color palette&gt;</option>
-                </select>
+                <span class="ui-cell">
+                    Color palette:
+                    <select id="palette_picker" disabled>
+                        <option selected>&lt;select color palette&gt;</option>
+                    </select>
+                </span>
+                <span class="ui-cell">
+                    <button type="button" id="undoZoomButton">Undo Zoom</button>
+                    <button type="button" id="resetButton">Reset Zoom</button>
+                </span>
             </div>
         </div>
     </body>

@@ -42,6 +42,16 @@ var Module = {
                 postMessage({
                     action: 'viewport-updated'
                 });
+            } else if (msg.action == 'reset-viewport') {
+                Module.ccall('reset_viewport', null, [], []);
+                postMessage({
+                    action: 'viewport-updated'
+                });
+            } else if (msg.action == 'undo-zoom') {
+                Module.ccall('undo_zoom', null, [], []);
+                postMessage({
+                    action: 'viewport-updated'
+                });
             }
         };
     },

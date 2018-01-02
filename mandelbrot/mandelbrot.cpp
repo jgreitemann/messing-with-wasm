@@ -7,6 +7,7 @@
 #include <sstream>
 #include <utility>
 #include <vector>
+#include <stack>
 
 
 #include <fstream>
@@ -23,7 +24,9 @@ uint8_t * write_px (Color const& px, uint8_t * d) {
 
 std::vector<std::string> palette_names;
 
-auto viewport = std::make_pair(std::make_pair(-2.5,1.), std::make_pair(-1.,1.));
+auto default_viewport = std::make_pair(std::make_pair(-2.5,1.), std::make_pair(-1.,1.));
+auto viewport = default_viewport;
+std::stack<decltype(viewport)> undo_stack;
 
 extern "C" {
 
@@ -43,13 +46,26 @@ extern "C" {
         return palette_names[idx].c_str();
     }
 
-    void set_viewport(double x0, double y0, double x1, double y1) {
+    void set_viewport (double x0, double y0, double x1, double y1) {
+        undo_stack.push(viewport);
         viewport = std::make_pair(
             std::make_pair(viewport.first.first + std::min(x0, x1) * (viewport.first.second - viewport.first.first),
                            viewport.first.first + std::max(x0, x1) * (viewport.first.second - viewport.first.first)),
             std::make_pair(viewport.second.first + std::min(y0, y1) * (viewport.second.second - viewport.second.first),
                            viewport.second.first + std::max(y0, y1) * (viewport.second.second - viewport.second.first))
             );
+    }
+
+    void reset_viewport () {
+        undo_stack.push(viewport);
+        viewport = default_viewport;
+    }
+
+    void undo_zoom () {
+        if (!undo_stack.empty()) {
+            viewport = undo_stack.top();
+            undo_stack.pop();
+        }
     }
 
     void mandelbrot (int width, int height, uint8_t * data, int pal_idx) {

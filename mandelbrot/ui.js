@@ -92,5 +92,16 @@ window.onload = function () {
         selection_canvas.addEventListener('mouseup', handle_up, false);
     }, false);
 
+    document.getElementById("resetButton").addEventListener("click", function () {
+        w.postMessage({
+            action: 'reset-viewport'
+        });
+    }, false);
+
+    document.getElementById("undoZoomButton").addEventListener("click", function () {
+        w.postMessage({
+            action: 'undo-zoom'
+        });
+    }, false);
 
 };
