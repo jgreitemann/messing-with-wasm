@@ -17,14 +17,14 @@ extern "C" {
         prob.add_sample({x, y}, label);
     }
 
-    double * get_model () {
+    double * get_model (double nu) {
         using Kernel = svm::kernel::linear;
         svm::problem<Kernel> prob_local(2);
         for (size_t i = 0; i < prob.size(); ++i) {
             auto sample = prob[i];
             prob_local.add_sample(sample.first, sample.second);
         }
-        svm::model<Kernel> model(std::move(prob_local), svm::parameters<Kernel>());
+        svm::model<Kernel> model(std::move(prob_local), svm::parameters<Kernel>(nu));
         svm::linear_introspector<Kernel> introspector(model);
         model_coeffs = {
             introspector.coefficient(0),
