@@ -16,7 +16,7 @@
                     <img id="spinner" src="spinner.gif" />
                 </div>
             </div>
-            <div id="ui">
+            <div class="ui">
                 <span class="ui-cell">
                     Color palette:
                     <select id="palette_picker" disabled>
@@ -26,6 +26,28 @@
                 <span class="ui-cell">
                     <button type="button" id="undoZoomButton">Undo Zoom</button>
                     <button type="button" id="resetButton">Reset Zoom</button>
+                </span>
+            </div>
+            <div class="ui">
+                <span class="ui-cell">
+                    <h3>Hints:</h3>
+                    <ul>
+                        <li>
+                            Change color palette used for rendering from the drop
+                            down. All color palettes have been adapted from ColorBrewer.
+                        </li>
+                        <li>
+                            Left-click-drag a zoom rectange, release to zoom-in.
+                            You can return to your previous zoom level with the
+                            Undo button, or reset the zoom to capture the full
+                            apple man.
+                        </li>
+                        <li>
+                            The calculation of the fractal happens client-side in
+                            your browser using WebAssembly. While the calculation
+                            is in progress, a spinner animation is shown.
+                        </li>
+                    </ul>
                 </span>
             </div>
         </div>
