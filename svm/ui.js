@@ -1,6 +1,14 @@
+var add_point;
+var get_model;
+
 var Module = {
     preRun: [],
     postRun: function () {
+        add_point = Module.cwrap('add_point', null, ['number', 'number', 'number']);
+        get_model = Module.cwrap('get_model', 'number', []);
+    },
+    print: function (text) {
+        console.log(text);
     },
     totalDependencies: 0
 };
@@ -35,6 +43,15 @@ window.onload = function () {
         naughty.forEach(function (pt) {
             ctx.fillRect(pt.x - r, pt.y - r, 2*r, 2*r);
         });
+
+        if (nice.length > 0 && naughty.length > 0) {
+            var ptr = get_model();
+            var a = Module.getValue(ptr, 'double');
+            var b = Module.getValue(ptr+8, 'double');
+            var rho = Module.getValue(ptr+16, 'double');
+
+            console.log('a = ' + a + ', b = ' + b + ', rho = ' + rho);
+        }
     }
 
     canvas.oncontextmenu = function () { return false; };
@@ -48,6 +65,8 @@ window.onload = function () {
         } else {
             naughty.push(pos);
         }
+
+        add_point(pos.x, pos.y, 1 ? event.button == 0 : -1);
 
         redraw();
     }, false);
