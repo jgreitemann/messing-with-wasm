@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en-us">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <link rel="stylesheet" type="text/css" href="style.css" />
+    </head>
+    <body>
+        <h1>An exploration of WebAssembly</h1>
+        <div id="content">
+            <h2>Project listing</h2>
+            <div>
+                <div class="project">
+                    <h3><a href="hello-world">Hello, world</a></h3>
+                    <p>
+                        Show a JavaScript alert box with a &quot;Hello, world!&quot;
+                        message from stdout of a WASM module.
+                    </p>
+                </div>
+                <div class="project">
+                    <h3><a href="linear-memory">Linear Memory</a></h3>
+                    <p>
+                        Transfer an integer from JavaScript input to the WASM module,
+                        add 42 to it and receive the result back in JavaScript.
+                    </p>
+                </div>
+                <div class="project">
+                    <h3><a href="mandelbrot">Mandelbrot Set</a></h3>
+                    <p>
+                        Calculate the Mandelbrot set from within a C/C++ program,
+                        compiled into a WASM module, and plot it in a HTML5 Canvas.
+                        Different colormaps (from ColorBrewer) can be applied,
+                        zooming is supported.
+                    </p>
+                </div>
+                <div class="project">
+                    <h3><a href="svm">Support Vector Machine</a></h3>
+                    <p>
+                        Toy around with support vector machines (SVM). Click in a
+                        HTML5 canvas to add 2D data points from two classes (left
+                        and right click, respectively). The SVM will &quot;learn&quot;
+                        a model (line with margin) to separate these data as best as
+                        possible. This demo uses a C++ wrapper library developed
+                        for our
+                        <a href="https://gitlab.physik.uni-muenchen.de/J.Greitemann/svm-order-params/">Learning of order parameters in statistical mechanics problems</a>
+                        which is in turn based on the 
+                        <a href="https://github.com/cjlin1/libsvm">libsvm</a>
+                        C library. WebAssembly is used to bring these technologies
+                        to the Web.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
