@@ -1,0 +1,4 @@
+svm_demo.js
+svm_demo.wasm
+*.o
+a.out
