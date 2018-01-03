@@ -33,6 +33,33 @@ window.onload = function () {
 
         var r = 5;
 
+        if (nice.length > 0 && naughty.length > 0) {
+            var ptr = get_model();
+            var a = Module.getValue(ptr, 'double');
+            var b = Module.getValue(ptr+8, 'double');
+            var rho = Module.getValue(ptr+16, 'double');
+
+            console.log('a = ' + a + ', b = ' + b + ', rho = ' + rho);
+
+            ctx.strokeStyle = '#999999';
+            ctx.lineWidth = 1;
+            ctx.fillStyle = '#dddddd';
+            ctx.beginPath();
+            ctx.moveTo(0, (rho - 1) / b);
+            ctx.lineTo(canvas.width, (rho - 1 - a * canvas.width) / b);
+            ctx.lineTo(canvas.width, (rho + 1 - a * canvas.width) / b);
+            ctx.lineTo(0, (rho + 1) / b);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, rho / b);
+            ctx.lineTo(canvas.width, (rho - a * canvas.width) / b);
+            ctx.stroke();
+        }
+
         ctx.fillStyle = 'green';
         nice.forEach(function (pt) {
             ctx.beginPath();
@@ -43,15 +70,6 @@ window.onload = function () {
         naughty.forEach(function (pt) {
             ctx.fillRect(pt.x - r, pt.y - r, 2*r, 2*r);
         });
-
-        if (nice.length > 0 && naughty.length > 0) {
-            var ptr = get_model();
-            var a = Module.getValue(ptr, 'double');
-            var b = Module.getValue(ptr+8, 'double');
-            var rho = Module.getValue(ptr+16, 'double');
-
-            console.log('a = ' + a + ', b = ' + b + ', rho = ' + rho);
-        }
     }
 
     canvas.oncontextmenu = function () { return false; };
