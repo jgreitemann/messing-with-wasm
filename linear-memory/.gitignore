@@ -1,4 +1,4 @@
-*.js
-*.wasm
+Makefile
+*.c
 *.o
 a.out

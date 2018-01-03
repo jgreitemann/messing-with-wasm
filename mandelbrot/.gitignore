@@ -1,5 +1,5 @@
-mandelbrot.js
-mandelbrot_module.js
-mandelbrot.wasm
+Makefile
+mandelbrot.cpp
+mandelbrot_module.js.in
 *.o
 a.out

@@ -1,4 +1,4 @@
-svm_demo.js
-svm_demo.wasm
+Makefile
+*.c
 *.o
 a.out
