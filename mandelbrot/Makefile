@@ -19,7 +19,7 @@ WASM = $(JS:.js=.wasm)
 all: $(HTML) $(JS)
 
 serve: $(HTML) $(JS)
-		$(EMRUN) --no_browser --port 8080 .
+		$(EMRUN) --no_browser --port 8080 ..
 
 clean:
 		$(RM) $(JS) $(WASM)
