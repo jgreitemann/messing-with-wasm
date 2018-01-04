@@ -21,6 +21,20 @@ window.onload = function () {
     var nu_slider = document.getElementById('nu-slider');
     var nu = parseFloat(nu_text.value);
 
+    var warning = document.getElementById('two-class-warning');
+    var exception_box = document.getElementById('exception');
+    var exception_text = document.getElementById('exception-text');
+
+    function show_exception (text) {
+        exception_text.innerHTML = text;
+        exception_box.style = 'display: visible;';
+    }
+    function hide_exception () {
+        exception_text.innerHTML = '';
+        exception_box.style = 'display: none;';
+    }
+    hide_exception();
+
     function update_slider () {
         nu_slider.value = nu * 100;
     }
@@ -43,30 +57,39 @@ window.onload = function () {
         var r = 5;
 
         if (nice.length > 0 && naughty.length > 0) {
+            warning.style = "display: none;";
             var ptr = get_model(nu);
-            var a = Module.getValue(ptr, 'double');
-            var b = Module.getValue(ptr+8, 'double');
-            var rho = Module.getValue(ptr+16, 'double');
+            if (ptr != 0) {
+                hide_exception();
+                var a = Module.getValue(ptr, 'double');
+                var b = Module.getValue(ptr+8, 'double');
+                var rho = Module.getValue(ptr+16, 'double');
 
-            console.log('a = ' + a + ', b = ' + b + ', rho = ' + rho);
+                console.log('a = ' + a + ', b = ' + b + ', rho = ' + rho);
 
-            ctx.strokeStyle = '#999999';
-            ctx.lineWidth = 1;
-            ctx.fillStyle = '#dddddd';
-            ctx.beginPath();
-            ctx.moveTo(0, (rho - 1) / b);
-            ctx.lineTo(canvas.width, (rho - 1 - a * canvas.width) / b);
-            ctx.lineTo(canvas.width, (rho + 1 - a * canvas.width) / b);
-            ctx.lineTo(0, (rho + 1) / b);
-            ctx.fill();
-            ctx.stroke();
+                ctx.strokeStyle = '#999999';
+                ctx.lineWidth = 1;
+                ctx.fillStyle = '#dddddd';
+                ctx.beginPath();
+                ctx.moveTo(0, (rho - 1) / b);
+                ctx.lineTo(canvas.width, (rho - 1 - a * canvas.width) / b);
+                ctx.lineTo(canvas.width, (rho + 1 - a * canvas.width) / b);
+                ctx.lineTo(0, (rho + 1) / b);
+                ctx.fill();
+                ctx.stroke();
 
-            ctx.strokeStyle = 'black';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(0, rho / b);
-            ctx.lineTo(canvas.width, (rho - a * canvas.width) / b);
-            ctx.stroke();
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(0, rho / b);
+                ctx.lineTo(canvas.width, (rho - a * canvas.width) / b);
+                ctx.stroke();
+            } else {
+                except_str = Module.ccall('get_err_string', 'string', [], []);
+                show_exception(except_str);
+            }
+        } else {
+            warning.style = "display: visible;";
         }
 
         ctx.fillStyle = 'green';

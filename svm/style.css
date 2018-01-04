@@ -24,19 +24,40 @@
     margin-top: 1em;
     margin-left: auto;
     margin-right: auto;
-    background-color: #cccccc;
     display: table;
     table-layout: fixed;
 }
 
-.ui-cell {
-    display: table-cell;
-    text-align: center;
-    padding: 1em;
+.neutral {
+    background-color: #eeeeee;
+    border: 1px solid #aaaaaa;
+    border-radius: 1em;
 }
 
-span {
+.error {
+    background-color: #ffeeee;
+    border: 1px solid #ffaaaa;
+    border-radius: 1em;
+}
+
+.warning {
+    background-color: #fff8e8;
+    border: 1px solid #eedd88;
+    border-radius: 1em;
+}
+
+.ui-cell {
+    display: table-cell;
+    padding: 1em;
     font-family: sans;
+}
+
+h3 {
+    font-style: italic;
+}
+
+.centered {
+    text-align:center;
 }
 
 #nu-text {
