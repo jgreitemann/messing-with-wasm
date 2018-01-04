@@ -18,7 +18,13 @@ var naughty = [];
 
 window.onload = function () {
     var nu_text = document.getElementById('nu-text');
+    var nu_slider = document.getElementById('nu-slider');
     var nu = parseFloat(nu_text.value);
+
+    function update_slider () {
+        nu_slider.value = nu * 100;
+    }
+    update_slider();
 
     var canvas = document.getElementById('canvas');
     var ctx = canvas.getContext('2d');
@@ -94,6 +100,13 @@ window.onload = function () {
 
     nu_text.onchange = function (event) {
         nu = parseFloat(nu_text.value);
+        update_slider();
+        redraw();
+    };
+
+    nu_slider.oninput = function (event) {
+        nu = 0.01 * nu_slider.value;
+        nu_text.value = nu;
         redraw();
     };
 

@@ -24,8 +24,6 @@
     margin-top: 1em;
     margin-left: auto;
     margin-right: auto;
-    padding-top: 1em;
-    padding-bottom: 1em;
     background-color: #cccccc;
     display: table;
     table-layout: fixed;
@@ -34,6 +32,7 @@
 .ui-cell {
     display: table-cell;
     text-align: center;
+    padding: 1em;
 }
 
 span {
@@ -42,4 +41,8 @@ span {
 
 #nu-text {
     width: 2em;
+}
+
+#nu-slider {
+    transform: translateY(+30%);
 }
