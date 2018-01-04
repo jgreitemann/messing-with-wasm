@@ -10,10 +10,11 @@
              preRun: [],
              postRun: function () {
                  var add_42 = Module.cwrap('add_42', null, ['number']);
-                 var x = Module._malloc(4);
-                 Module.setValue(x, 13, 'i32');
-                 add_42(x);
-                 alert("x = " + Module.getValue(x, 'i32'));
+                 var ptr = Module._malloc(4);
+                 var x = parseInt(prompt('Enter a number:'));
+                 Module.setValue(ptr, x, 'i32');
+                 add_42(ptr);
+                 alert(x + ' + 42 = ' + Module.getValue(ptr, 'i32'));
              },
              totalDependencies: 0
          };
