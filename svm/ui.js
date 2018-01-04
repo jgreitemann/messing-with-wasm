@@ -5,7 +5,7 @@ var Module = {
     preRun: [],
     postRun: function () {
         add_point = Module.cwrap('add_point', null, ['number', 'number', 'number']);
-        get_model = Module.cwrap('get_model', 'number', []);
+        get_model = Module.cwrap('get_model', 'number', ['number']);
     },
     print: function (text) {
         console.log(text);
@@ -34,7 +34,7 @@ window.onload = function () {
         var r = 5;
 
         if (nice.length > 0 && naughty.length > 0) {
-            var ptr = get_model();
+            var ptr = get_model(0.25);
             var a = Module.getValue(ptr, 'double');
             var b = Module.getValue(ptr+8, 'double');
             var rho = Module.getValue(ptr+16, 'double');
