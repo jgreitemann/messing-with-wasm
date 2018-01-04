@@ -27,13 +27,14 @@ window.onload = function () {
                 length: imageData.data.length
             });
 
-            refresh_canvas();
-
             picker.disabled = false;
-            picker.onchange = function () {
+            picker.selectedIndex = 13;
+            function handle_picker () {
                 selected_pal = picker.options[picker.selectedIndex].value;
                 refresh_canvas();
             };
+            picker.onchange = handle_picker;
+            handle_picker();
         } else if (msg.action == 'render-canvas') {
             imageData = msg.imageData;
             ctx.putImageData(imageData, 0, 0);

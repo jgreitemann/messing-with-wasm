@@ -4,6 +4,7 @@
         <meta charset="utf-8">
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <link rel="stylesheet" type="text/css" href="style.css" />
+        <link rel="stylesheet" type="text/css" href="../ui.css" />
     </head>
     <body>
         <script type="text/javascript" src="ui.js"></script>
@@ -12,9 +13,56 @@
             <div id="layers">
                 <canvas id="canvas" class="layer" width="981" height="561"></canvas>
             </div>
-            <div class="ui">
+            <div class="ui neutral">
+                <span class="ui-cell centered">
+                    &nu; =
+                    <input type="text" id="nu-text" value="0.25" />
+                    <input type="range" id="nu-slider" min="1" max="100" value="25" />
+                </span>
+                <span class="ui-cell centered">
+                    <button id="clear-button">Clear Points</button>
+                </span>
+            </div>
+            <div class="ui error" id="exception">
                 <span class="ui-cell">
-                    Hello, world!
+                    <h3>Exception</h3>
+                    <p id="exception-text">Upps, something went wrong...</p>
+                </span>
+            </div>
+            <div class="ui warning" id="two-class-warning">
+                <span class="ui-cell">
+                    <h3>Hint</h3>
+                    <p>
+                        Add points to each of the two classes by left- and
+                        right-clicking inside the canvas to trigger the computation
+                        of a SVM model.
+                    </p>
+                </span>
+            </div>
+            <div class="ui neutral">
+                <span class="ui-cell">
+                    <h3>Instructions:</h3>
+                    <ul>
+                        <li>
+                            Left- and right-click to add points belonging to
+                            either one of two classes to the canvas.
+                        </li>
+                        <li>
+                            At least one point in each class is necessary to
+                            &quot;learn&quot; an SVM model.
+                        </li>
+                        <li>
+                            Adjust the regularization parameter &nu; between 0
+                            and 1. Small values correspond to a hard margin, i.e.
+                            low tolerance towards misclassified data and may lead
+                            to overfitting of noisy data. Large values correspond
+                            to a soft margin and may ignore features in the data.
+                        </li>
+                        <li>
+                            Large values of &nu; that are approaching 1 may cause
+                            the SVM optimization to fail.
+                        </li>
+                    </ul>
                 </span>
             </div>
         </div>

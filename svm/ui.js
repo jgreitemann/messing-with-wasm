@@ -1,10 +1,12 @@
 var add_point;
+var clear_points;
 var get_model;
 
 var Module = {
     preRun: [],
     postRun: function () {
         add_point = Module.cwrap('add_point', null, ['number', 'number', 'number']);
+        clear_points = Module.cwrap('clear_points', null, []);
         get_model = Module.cwrap('get_model', 'number', ['number']);
     },
     print: function (text) {
@@ -17,6 +19,29 @@ var nice = [];
 var naughty = [];
 
 window.onload = function () {
+    var nu_text = document.getElementById('nu-text');
+    var nu_slider = document.getElementById('nu-slider');
+    var nu = parseFloat(nu_text.value);
+
+    var warning = document.getElementById('two-class-warning');
+    var exception_box = document.getElementById('exception');
+    var exception_text = document.getElementById('exception-text');
+
+    function show_exception (text) {
+        exception_text.innerHTML = text;
+        exception_box.style = 'display: visible;';
+    }
+    function hide_exception () {
+        exception_text.innerHTML = '';
+        exception_box.style = 'display: none;';
+    }
+    hide_exception();
+
+    function update_slider () {
+        nu_slider.value = nu * 100;
+    }
+    update_slider();
+
     var canvas = document.getElementById('canvas');
     var ctx = canvas.getContext('2d');
 
@@ -34,30 +59,39 @@ window.onload = function () {
         var r = 5;
 
         if (nice.length > 0 && naughty.length > 0) {
-            var ptr = get_model(0.25);
-            var a = Module.getValue(ptr, 'double');
-            var b = Module.getValue(ptr+8, 'double');
-            var rho = Module.getValue(ptr+16, 'double');
+            warning.style = "display: none;";
+            var ptr = get_model(nu);
+            if (ptr != 0) {
+                hide_exception();
+                var a = Module.getValue(ptr, 'double');
+                var b = Module.getValue(ptr+8, 'double');
+                var rho = Module.getValue(ptr+16, 'double');
 
-            console.log('a = ' + a + ', b = ' + b + ', rho = ' + rho);
+                console.log('a = ' + a + ', b = ' + b + ', rho = ' + rho);
 
-            ctx.strokeStyle = '#999999';
-            ctx.lineWidth = 1;
-            ctx.fillStyle = '#dddddd';
-            ctx.beginPath();
-            ctx.moveTo(0, (rho - 1) / b);
-            ctx.lineTo(canvas.width, (rho - 1 - a * canvas.width) / b);
-            ctx.lineTo(canvas.width, (rho + 1 - a * canvas.width) / b);
-            ctx.lineTo(0, (rho + 1) / b);
-            ctx.fill();
-            ctx.stroke();
+                ctx.strokeStyle = '#999999';
+                ctx.lineWidth = 1;
+                ctx.fillStyle = '#dddddd';
+                ctx.beginPath();
+                ctx.moveTo(0, (rho - 1) / b);
+                ctx.lineTo(canvas.width, (rho - 1 - a * canvas.width) / b);
+                ctx.lineTo(canvas.width, (rho + 1 - a * canvas.width) / b);
+                ctx.lineTo(0, (rho + 1) / b);
+                ctx.fill();
+                ctx.stroke();
 
-            ctx.strokeStyle = 'black';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(0, rho / b);
-            ctx.lineTo(canvas.width, (rho - a * canvas.width) / b);
-            ctx.stroke();
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(0, rho / b);
+                ctx.lineTo(canvas.width, (rho - a * canvas.width) / b);
+                ctx.stroke();
+            } else {
+                except_str = Module.ccall('get_err_string', 'string', [], []);
+                show_exception(except_str);
+            }
+        } else {
+            warning.style = "display: visible;";
         }
 
         ctx.fillStyle = 'green';
@@ -89,4 +123,22 @@ window.onload = function () {
         redraw();
     }, false);
 
+    nu_text.onchange = function (event) {
+        nu = parseFloat(nu_text.value);
+        update_slider();
+        redraw();
+    };
+
+    nu_slider.oninput = function (event) {
+        nu = 0.01 * nu_slider.value;
+        nu_text.value = nu;
+        redraw();
+    };
+
+    document.getElementById('clear-button').onclick = function (event) {
+        nice = [];
+        naughty = [];
+        clear_points();
+        redraw();
+    }
 };
