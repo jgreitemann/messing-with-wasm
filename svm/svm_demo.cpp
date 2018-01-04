@@ -20,6 +20,10 @@ extern "C" {
         prob.add_sample({x, y}, label);
     }
 
+    void clear_points () {
+        prob = problem_t(2);
+    }
+
     double * get_model (double nu) {
         using Kernel = svm::kernel::linear;
         svm::problem<Kernel> prob_local(2);

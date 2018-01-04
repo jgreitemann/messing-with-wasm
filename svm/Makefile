@@ -8,7 +8,7 @@ EMRUN = source ~/opensource/emsdk/emsdk_env.sh && emrun
 EMCC = source ~/opensource/emsdk/emsdk_env.sh && emcc
 EM_OPT = -s DISABLE_EXCEPTION_CATCHING=0
 EM_EXEX = -s 'EXTRA_EXPORTED_RUNTIME_METHODS=["ccall", "cwrap", "getValue", "setValue"]'
-EM_EX = -s EXPORTED_FUNCTIONS='["_main", "_add_point", "_get_model", "_get_err_string"]'
+EM_EX = -s EXPORTED_FUNCTIONS='["_main", "_add_point", "_clear_points", "_get_model", "_get_err_string"]'
 
 INCLUDES = -I../thirdparty/svm-order-params/svm -I../thirdparty/svm-order-params/svm/libsvm
 CXXFLAGS = -std=c++14 -O3

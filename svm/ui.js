@@ -1,10 +1,12 @@
 var add_point;
+var clear_points;
 var get_model;
 
 var Module = {
     preRun: [],
     postRun: function () {
         add_point = Module.cwrap('add_point', null, ['number', 'number', 'number']);
+        clear_points = Module.cwrap('clear_points', null, []);
         get_model = Module.cwrap('get_model', 'number', ['number']);
     },
     print: function (text) {
@@ -133,4 +135,10 @@ window.onload = function () {
         redraw();
     };
 
+    document.getElementById('clear-button').onclick = function (event) {
+        nice = [];
+        naughty = [];
+        clear_points();
+        redraw();
+    }
 };
