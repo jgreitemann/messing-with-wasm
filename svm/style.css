@@ -39,3 +39,7 @@
 span {
     font-family: sans;
 }
+
+#nu-text {
+    width: 2em;
+}

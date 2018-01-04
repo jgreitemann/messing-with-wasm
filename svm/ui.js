@@ -17,6 +17,9 @@ var nice = [];
 var naughty = [];
 
 window.onload = function () {
+    var nu_text = document.getElementById('nu-text');
+    var nu = parseFloat(nu_text.value);
+
     var canvas = document.getElementById('canvas');
     var ctx = canvas.getContext('2d');
 
@@ -34,7 +37,7 @@ window.onload = function () {
         var r = 5;
 
         if (nice.length > 0 && naughty.length > 0) {
-            var ptr = get_model(0.25);
+            var ptr = get_model(nu);
             var a = Module.getValue(ptr, 'double');
             var b = Module.getValue(ptr+8, 'double');
             var rho = Module.getValue(ptr+16, 'double');
@@ -88,5 +91,10 @@ window.onload = function () {
 
         redraw();
     }, false);
+
+    nu_text.onchange = function (event) {
+        nu = parseFloat(nu_text.value);
+        redraw();
+    };
 
 };
