@@ -8,6 +8,7 @@ do
     make
     cd ..
 done
+git checkout gh-pages .gitignore
 git add .
 git stash save
 git checkout gh-pages
