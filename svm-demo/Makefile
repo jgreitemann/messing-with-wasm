@@ -21,7 +21,7 @@ SVM_CPP = ../thirdparty/svm-order-params/svm/data_view.cpp ../thirdparty/svm-ord
 all: $(HTML) $(JS)
 
 serve: $(HTML) $(JS)
-		$(EMRUN) --no_browser --port 8080 ..
+		$(EMRUN) --no_browser --port 8080 .
 
 clean:
 		$(RM) $(JS) $(WASM)

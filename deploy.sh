@@ -1,7 +1,7 @@
 #!/bin/bash
 
 git checkout master
-for subdir in hello-world linear-memory mandelbrot svm
+for subdir in hello-world linear-memory mandelbrot svm-demo
 do
     cd $subdir
     git checkout gh-pages .gitignore
