@@ -23,9 +23,9 @@ Toy around with support vector machines (SVM). Click in a
 HTML5 canvas to add 2D data points from two classes (left
 and right click, respectively). The SVM will &quot;learn&quot;
 a model (line with margin) to separate these data as best as
-possible. This demo uses a C++ wrapper library developed
-for our [Learning of order parameters in statistical mechanics problems](https://gitlab.physik.uni-muenchen.de/J.Greitemann/svm-order-params/)
-which is in turn based on the 
+possible. This demo uses a 
+[C++ wrapper library](https://github.com/jgreitemann/svm) 
+which is based on the 
 [libsvm](https://github.com/cjlin1/libsvm)
 C library. WebAssembly is used to bring these technologies
 to the Web.
