@@ -1,0 +1,6 @@
+[submodule "colormap"]
+	path = colormap
+	url = git@github.com:jgreitemann/colormap
+[submodule "svm"]
+	path = svm
+	url = git@github.com:jgreitemann/svm
