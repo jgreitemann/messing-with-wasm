@@ -18,7 +18,7 @@ compiled into a WASM module, and plot it in a HTML5 Canvas.
 Different colormaps (from ColorBrewer) can be applied,
 zooming is supported.
 
-### [Support Vector Machine](https://jgreitemann.github.io/messing-with-wasm/svm)
+### [Support Vector Machine](https://jgreitemann.github.io/messing-with-wasm/svm-demo)
 Toy around with support vector machines (SVM). Click in a
 HTML5 canvas to add 2D data points from two classes (left
 and right click, respectively). The SVM will &quot;learn&quot;
