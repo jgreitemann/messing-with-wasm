@@ -24,6 +24,7 @@ window.onload = function () {
     var nu_text = document.getElementById('nu-text');
     var nu_slider = document.getElementById('nu-slider');
     var nu = parseFloat(nu_text.value);
+    var SVcheckbox = document.getElementById('SVcheckbox');
 
     var warning = document.getElementById('two-class-warning');
     var exception_box = document.getElementById('exception');
@@ -106,6 +107,8 @@ window.onload = function () {
         naughty.forEach(function (pt) {
             ctx.fillRect(pt.x - r, pt.y - r, 2*r, 2*r);
         });
+
+        if (SVcheckbox.checked) {
             ctx.strokeStyle = 'blue';
             var SV_ptr;
             for (var i = 0; SV_ptr = get_SV_coord(i); ++i) {
@@ -115,6 +118,7 @@ window.onload = function () {
                 ctx.arc(SV_x, SV_y, 1.5*r, 0, 2*Math.PI, false);
                 ctx.stroke();
             }
+        }
     }
 
     canvas.oncontextmenu = function () { return false; };
@@ -145,6 +149,10 @@ window.onload = function () {
         nu_text.value = nu;
         redraw();
     };
+
+    SVcheckbox.onclick = function (event) {
+        redraw();
+    }
 
     document.getElementById('clear-button').onclick = function (event) {
         nice = [];
