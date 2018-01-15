@@ -1,6 +1,7 @@
 var add_point;
 var clear_points;
 var get_model;
+var get_SV_coord;
 
 var Module = {
     preRun: [],
@@ -8,6 +9,7 @@ var Module = {
         add_point = Module.cwrap('add_point', null, ['number', 'number', 'number']);
         clear_points = Module.cwrap('clear_points', null, []);
         get_model = Module.cwrap('get_model', 'number', ['number']);
+        get_SV_coord = Module.cwrap('get_SV_coord', 'number', ['number']);
     },
     print: function (text) {
         console.log(text);
@@ -104,6 +106,15 @@ window.onload = function () {
         naughty.forEach(function (pt) {
             ctx.fillRect(pt.x - r, pt.y - r, 2*r, 2*r);
         });
+            ctx.strokeStyle = 'blue';
+            var SV_ptr;
+            for (var i = 0; SV_ptr = get_SV_coord(i); ++i) {
+                var SV_x = Module.getValue(SV_ptr, 'double');
+                var SV_y = Module.getValue(SV_ptr+8, 'double');
+                ctx.beginPath();
+                ctx.arc(SV_x, SV_y, 1.5*r, 0, 2*Math.PI, false);
+                ctx.stroke();
+            }
     }
 
     canvas.oncontextmenu = function () { return false; };
