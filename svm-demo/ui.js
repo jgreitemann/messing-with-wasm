@@ -10,6 +10,21 @@ var Module = {
         clear_points = Module.cwrap('clear_points', null, []);
         get_model = Module.cwrap('get_model', 'number', ['number']);
         get_SV_coord = Module.cwrap('get_SV_coord', 'number', ['number']);
+
+        get_n_lines_zero = Module.cwrap('get_n_lines_zero', 'number', []);
+        get_n_line_points_zero = Module.cwrap('get_n_line_points_zero', 'number', ['number']);
+        get_line_points_zero = Module.cwrap('get_line_points_zero', 'number', ['number']);
+        get_line_closed_zero = Module.cwrap('get_line_closed_zero', 'number', ['number']);
+
+        get_n_lines_plus = Module.cwrap('get_n_lines_plus', 'number', []);
+        get_n_line_points_plus = Module.cwrap('get_n_line_points_plus', 'number', ['number']);
+        get_line_points_plus = Module.cwrap('get_line_points_plus', 'number', ['number']);
+        get_line_closed_plus = Module.cwrap('get_line_closed_plus', 'number', ['number']);
+
+        get_n_lines_minus = Module.cwrap('get_n_lines_minus', 'number', []);
+        get_n_line_points_minus = Module.cwrap('get_n_line_points_minus', 'number', ['number']);
+        get_line_points_minus = Module.cwrap('get_line_points_minus', 'number', ['number']);
+        get_line_closed_minus = Module.cwrap('get_line_closed_minus', 'number', ['number']);
     },
     print: function (text) {
         console.log(text);
@@ -56,6 +71,63 @@ window.onload = function () {
         };
     }
 
+    function edge_index(x, y) {
+        var eps = 0.1;
+        if (Math.abs(x) < eps)
+            return 3;
+        if (Math.abs(y) < eps)
+            return 0;
+        if (Math.abs(x - canvas.width) < eps)
+            return 1;
+        if (Math.abs(y - canvas.height) < eps)
+            return 2;
+    }
+
+    function traverse_boundary(ax, ay, bx, by, dir) {
+        var start_edge = edge_index(ax, ay);
+        var target_edge = edge_index(bx, by);
+        var current_edge = start_edge;
+        var x = ax, y = ay;
+        while (current_edge != target_edge) {
+            if (dir == 'ccw') {
+                switch (current_edge) {
+                case 0:
+                    x = 0;
+                    break;
+                case 1:
+                    y = 0;
+                    break;
+                case 2:
+                    x = canvas.width;
+                    break;
+                case 3:
+                    y = canvas.height;
+                    break;
+                }
+                ctx.lineTo(x, y);
+                current_edge = (current_edge + 3) % 4;
+            } else {
+                switch (current_edge) {
+                case 0:
+                    x = canvas.width;
+                    break;
+                case 1:
+                    y = canvas.height;
+                    break;
+                case 2:
+                    x = 0;
+                    break;
+                case 3:
+                    y = 0;
+                    break;
+                }
+                ctx.lineTo(x, y);
+                current_edge = (current_edge + 1) % 4;
+            }
+        }
+        ctx.lineTo(bx, by);
+    }
+
     function redraw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -75,20 +147,91 @@ window.onload = function () {
                 ctx.strokeStyle = '#999999';
                 ctx.lineWidth = 1;
                 ctx.fillStyle = '#dddddd';
-                ctx.beginPath();
-                ctx.moveTo(0, (rho - 1) / b);
-                ctx.lineTo(canvas.width, (rho - 1 - a * canvas.width) / b);
-                ctx.lineTo(canvas.width, (rho + 1 - a * canvas.width) / b);
-                ctx.lineTo(0, (rho + 1) / b);
-                ctx.fill();
-                ctx.stroke();
+                if (false) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, (rho - 1) / b);
+                    ctx.lineTo(canvas.width, (rho - 1 - a * canvas.width) / b);
+                    ctx.lineTo(canvas.width, (rho + 1 - a * canvas.width) / b);
+                    ctx.lineTo(0, (rho + 1) / b);
+                    ctx.fill();
+                    ctx.stroke();
+                } else {
+                    ctx.beginPath();
+                    {
+                        var n_lines = get_n_lines_minus();
+                        for (var i = 0; i < n_lines; ++i) {
+                            var n_pt = get_n_line_points_minus(i);
+                            var ptr = get_line_points_minus(i);
+                            ctx.moveTo(Module.getValue(ptr, 'double'),
+                                       Module.getValue(ptr + 8, 'double'));
+                            for (var j = 1; j < n_pt; ++j) {
+                                ctx.lineTo(Module.getValue(ptr + 16*j, 'double'),
+                                           Module.getValue(ptr + 16*j + 8, 'double'));
+                            }
+                            if (get_line_closed_minus(i)) {
+                                ctx.lineTo(Module.getValue(ptr, 'double'),
+                                           Module.getValue(ptr + 8, 'double'));
+                            } else {
+                                traverse_boundary(Module.getValue(ptr + 16*(n_pt-1), 'double'),
+                                                  Module.getValue(ptr + 16*(n_pt-1) + 8, 'double'),
+                                                  Module.getValue(ptr, 'double'),
+                                                  Module.getValue(ptr + 8, 'double'),
+                                                  'ccw');
+                            }
+                        }
+                    }
+                    {
+                        var n_lines = get_n_lines_plus();
+                        for (var i = 0; i < n_lines; ++i) {
+                            var n_pt = get_n_line_points_plus(i);
+                            var ptr = get_line_points_plus(i);
+                            ctx.moveTo(Module.getValue(ptr + 16*(n_pt-1), 'double'),
+                                       Module.getValue(ptr + 16*(n_pt-1) + 8, 'double'));
+                            for (var j = n_pt - 2; j >= 0; --j) {
+                                ctx.lineTo(Module.getValue(ptr + 16*j, 'double'),
+                                           Module.getValue(ptr + 16*j + 8, 'double'));
+                            }
+                            if (get_line_closed_plus(i)) {
+                                ctx.lineTo(Module.getValue(ptr + 16*(n_pt-1), 'double'),
+                                           Module.getValue(ptr + 16*(n_pt-1) + 8, 'double'));
+                            } else {
+                                traverse_boundary(Module.getValue(ptr, 'double'),
+                                                  Module.getValue(ptr + 8, 'double'),
+                                                  Module.getValue(ptr + 16*(n_pt-1), 'double'),
+                                                  Module.getValue(ptr + 16*(n_pt-1) + 8, 'double'),
+                                                  'cw');
+                            }
+                        }
+                    }
+                    ctx.fill('evenodd');
+                    ctx.stroke();
+                }
 
                 ctx.strokeStyle = 'black';
                 ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(0, rho / b);
-                ctx.lineTo(canvas.width, (rho - a * canvas.width) / b);
-                ctx.stroke();
+                if (false) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, rho / b);
+                    ctx.lineTo(canvas.width, (rho - a * canvas.width) / b);
+                    ctx.stroke();
+                } else {
+                    var n_lines = get_n_lines_zero();
+                    for (var i = 0; i < n_lines; ++i) {
+                        var n_pt = get_n_line_points_zero(i);
+                        var ptr = get_line_points_zero(i);
+                        ctx.beginPath();
+                        ctx.moveTo(Module.getValue(ptr, 'double'),
+                                   Module.getValue(ptr + 8, 'double'));
+                        for (var j = 1; j < n_pt; ++j) {
+                            ctx.lineTo(Module.getValue(ptr + 16*j, 'double'),
+                                       Module.getValue(ptr + 16*j + 8, 'double'));
+                        }
+                        if (get_line_closed_zero(i)) {
+                            ctx.closePath();
+                        }
+                        ctx.stroke();
+                    }
+                }
             } else {
                 except_str = Module.ccall('get_err_string', 'string', [], []);
                 show_exception(except_str);
@@ -152,12 +295,12 @@ window.onload = function () {
 
     SVcheckbox.onclick = function (event) {
         redraw();
-    }
+    };
 
     document.getElementById('clear-button').onclick = function (event) {
         nice = [];
         naughty = [];
         clear_points();
         redraw();
-    }
+    };
 };

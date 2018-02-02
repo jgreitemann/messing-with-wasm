@@ -7,36 +7,18 @@
 #include <vector>
 
 
-
-double test_func (contour::point_type const& xs, double shift = 0.) {
-    double x = xs[0];
-    double y = xs[1];
-    return (4. * exp(-10.*(pow(x-.6,2.)+pow(y-.5,2.)))
-            + 2. * exp(-15.*(pow(x-.2,2.)+5.*pow(y-.7,2.)))
-            - exp(-20.*(pow(x-.4,2.)+pow(y-.7,2.)))
-            - 2. + shift);
-}
-
-
 using problem_t = svm::problem<svm::kernel::linear>;
 problem_t prob(2);
 std::vector<double> model_coeffs;
 std::vector<double> SV_coords;
 std::string err_str;
 
+std::vector<std::vector<double>> line_points_zero, line_points_plus, line_points_minus;
+std::vector<bool> line_closed_zero, line_closed_plus, line_closed_minus;
+
 extern "C" {
 
     int main () {
-        auto lines = contour::contour_lines(
-            [] (contour::point_type const& xs) { return test_func(xs, 0.); },
-            {{26, {0., 1.}}, {51, {0., 1.}}});
-        for (auto const& line : lines) {
-            for (auto const& pt : line.points)
-                std::cout << pt[0] << ' ' << pt[1] << '\n';
-            if (line.closed)
-                std::cout << line.points.front()[0] << ' ' << line.points.front()[1] << '\n';
-            std::cout << '\n';
-        }
     }
 
     void add_point (double x, double y, double label) {
@@ -49,7 +31,7 @@ extern "C" {
     }
 
     double * get_model (double nu) {
-        using Kernel = svm::kernel::linear;
+        using Kernel = svm::kernel::polynomial<2>;
         svm::problem<Kernel> prob_local(2);
         for (size_t i = 0; i < prob.size(); ++i) {
             auto sample = prob[i];
@@ -68,6 +50,63 @@ extern "C" {
                 introspector.coefficient(1),
                 model.rho()
             };
+
+            contour::grid_type g {{99, {0, 981}}, {57, {0, 561}}};
+            {
+                line_points_zero.clear();
+                line_closed_zero.clear();
+                auto lines = contour::contour_lines(
+                    [&model] (contour::point_type const& pt) {
+                        return model(pt).second;
+                    }, g);
+                for (auto const& line : lines) {
+                    std::vector<double> line_points;
+                    line_points.reserve(2 * line.points.size());
+                    for (auto const& pt : line.points) {
+                        line_points.push_back(pt[0]);
+                        line_points.push_back(pt[1]);
+                    }
+                    line_points_zero.push_back(line_points);
+                    line_closed_zero.push_back(line.closed);
+                }
+            }
+            {
+                line_points_plus.clear();
+                line_closed_plus.clear();
+                auto lines = contour::contour_lines(
+                    [&model] (contour::point_type const& pt) {
+                        return model(pt).second + 1;
+                    }, g);
+                for (auto const& line : lines) {
+                    std::vector<double> line_points;
+                    line_points.reserve(2 * line.points.size());
+                    for (auto const& pt : line.points) {
+                        line_points.push_back(pt[0]);
+                        line_points.push_back(pt[1]);
+                    }
+                    line_points_plus.push_back(line_points);
+                    line_closed_plus.push_back(line.closed);
+                }
+            }
+            {
+                line_points_minus.clear();
+                line_closed_minus.clear();
+                auto lines = contour::contour_lines(
+                    [&model] (contour::point_type const& pt) {
+                        return model(pt).second - 1;
+                    }, g);
+                for (auto const& line : lines) {
+                    std::vector<double> line_points;
+                    line_points.reserve(2 * line.points.size());
+                    for (auto const& pt : line.points) {
+                        line_points.push_back(pt[0]);
+                        line_points.push_back(pt[1]);
+                    }
+                    line_points_minus.push_back(line_points);
+                    line_closed_minus.push_back(line.closed);
+                }
+            }
+
             return model_coeffs.data();
         } catch (std::runtime_error const& err) {
             err_str = err.what();
@@ -83,6 +122,54 @@ extern "C" {
 
     char const * get_err_string () {
         return err_str.c_str();
+    }
+
+    size_t get_n_lines_zero () {
+        return line_points_zero.size();
+    }
+
+    size_t get_n_line_points_zero (size_t i) {
+        return line_points_zero[i].size() / 2;
+    }
+
+    double * get_line_points_zero (size_t i) {
+        return line_points_zero[i].data();
+    }
+
+    bool get_line_closed_zero (size_t i) {
+        return line_closed_zero[i];
+    }
+
+    size_t get_n_lines_plus () {
+        return line_points_plus.size();
+    }
+
+    size_t get_n_line_points_plus (size_t i) {
+        return line_points_plus[i].size() / 2;
+    }
+
+    double * get_line_points_plus (size_t i) {
+        return line_points_plus[i].data();
+    }
+
+    bool get_line_closed_plus (size_t i) {
+        return line_closed_plus[i];
+    }
+
+    size_t get_n_lines_minus () {
+        return line_points_minus.size();
+    }
+
+    size_t get_n_line_points_minus (size_t i) {
+        return line_points_minus[i].size() / 2;
+    }
+
+    double * get_line_points_minus (size_t i) {
+        return line_points_minus[i].data();
+    }
+
+    bool get_line_closed_minus (size_t i) {
+        return line_closed_minus[i];
     }
 
 }
