@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <map>
 #include <stdexcept>
 #include <tuple>
@@ -57,6 +58,49 @@ namespace contour {
             CCW = 1
         };
 
+        point_type mix_points (point_type const& a, point_type const& b, double mix = 0.5) {
+            point_type res(a);
+            auto it_b = std::begin(b);
+            for (auto & x : res) {
+                x = (1.-mix) * x + mix * *it_b;
+                ++it_b;
+            }
+            return res;
+        }
+
+        namespace root_finding {
+
+            point_type linear_interpolation (scalar_fun_t f,
+                                             point_type a, point_type b,
+                                             typename scalar_fun_t::result_type val_a,
+                                             typename scalar_fun_t::result_type val_b) {
+                return mix_points(a, b, val_a / (val_a - val_b));
+            }
+
+            point_type bisection (scalar_fun_t f,
+                                  point_type a, point_type b,
+                                  typename scalar_fun_t::result_type val_a,
+                                  typename scalar_fun_t::result_type val_b,
+                                  double eps = 1e-6) {
+                point_type root = linear_interpolation(f, a, b, val_a, val_b);
+                for (size_t i = 0; i < 10; ++i) {
+                    auto val_root = f(root);
+                    if (std::abs(val_root) < eps)
+                        break;
+                    if (val_a * val_root < 0) {
+                        b = root;
+                        val_b = val_root;
+                    } else {
+                        a = root;
+                        val_a = val_root;
+                    }
+                    root = linear_interpolation(f, a, b, val_a, val_b);
+                }
+                return root;
+            }
+
+        }
+
         struct plaquette {
             plaquette (scalar_fun_t f, std::array<point_type,4> const& corner_loci) {
                 using value_t = decltype(f(point_type()));
@@ -75,13 +119,13 @@ namespace contour {
                             orientations[dir] = orientation::none;
                         } else {
                             orientations[dir] = orientation::CW;
-                            points[dir] = mix_points(corner_loci[fw_c], corner_loci[bw_c], vals[fw_c] / (vals[fw_c] - vals[bw_c]));
+                            points[dir] = root_finding::bisection(f, corner_loci[fw_c], corner_loci[bw_c], vals[fw_c], vals[bw_c]);
                             ++line_count_;
                         }
                     } else {
                         if (vals[bw_c] < 0) {
                             orientations[dir] = orientation::CCW;
-                            points[dir] = mix_points(corner_loci[fw_c], corner_loci[bw_c], vals[fw_c] / (vals[fw_c] - vals[bw_c]));
+                            points[dir] = root_finding::bisection(f, corner_loci[fw_c], corner_loci[bw_c], vals[fw_c], vals[bw_c]);
                             ++line_count_;
                         } else {
                             orientations[dir] = orientation::none;
@@ -117,15 +161,6 @@ namespace contour {
             }
 
         private:
-            point_type mix_points (point_type const& a, point_type const& b, double mix = 0.5) {
-                point_type res(a);
-                auto it_b = std::begin(b);
-                for (auto & x : res) {
-                    x = (1.-mix) * x + mix * *it_b;
-                    ++it_b;
-                }
-                return res;
-            }
             std::array<orientation,4> orientations;
             std::array<point_type,4> points;
             std::array<plaquette *,4> neighbors;
