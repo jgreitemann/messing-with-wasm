@@ -1,9 +1,21 @@
 #include <svm-wrapper.hpp>
+#include <grid.hpp>
+#include "contour.hpp"
 
-#include <stdexcept>
-#include <memory>
-#include <vector>
+#include <cmath>
 #include <string>
+#include <vector>
+
+
+
+double test_func (contour::point_type const& xs, double shift = 0.) {
+    double x = xs[0];
+    double y = xs[1];
+    return (4. * exp(-10.*(pow(x-.6,2.)+pow(y-.5,2.)))
+            + 2. * exp(-15.*(pow(x-.2,2.)+5.*pow(y-.7,2.)))
+            - exp(-20.*(pow(x-.4,2.)+pow(y-.7,2.)))
+            - 2. + shift);
+}
 
 
 using problem_t = svm::problem<svm::kernel::linear>;
@@ -15,6 +27,16 @@ std::string err_str;
 extern "C" {
 
     int main () {
+        auto lines = contour::contour_lines(
+            [] (contour::point_type const& xs) { return test_func(xs, 0.); },
+            {{26, {0., 1.}}, {51, {0., 1.}}});
+        for (auto const& line : lines) {
+            for (auto const& pt : line.points)
+                std::cout << pt[0] << ' ' << pt[1] << '\n';
+            if (line.closed)
+                std::cout << line.points.front()[0] << ' ' << line.points.front()[1] << '\n';
+            std::cout << '\n';
+        }
     }
 
     void add_point (double x, double y, double label) {
