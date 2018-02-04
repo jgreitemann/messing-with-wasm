@@ -156,6 +156,14 @@ window.onload = function () {
                     ctx.fill();
                     ctx.stroke();
                 } else {
+                    // get trail point
+                    var tx = 0, ty = 0;
+                    if (get_n_lines_zero() > 0) {
+                        var ptr = get_line_points_zero(0);
+                        tx = Module.getValue(ptr + 16, 'double');
+                        ty = Module.getValue(ptr + 24, 'double');
+                    }
+
                     ctx.beginPath();
                     {
                         var n_lines = get_n_lines_minus();
@@ -185,23 +193,26 @@ window.onload = function () {
                         for (var i = 0; i < n_lines; ++i) {
                             var n_pt = get_n_line_points_plus(i);
                             var ptr = get_line_points_plus(i);
-                            ctx.moveTo(Module.getValue(ptr + 16*(n_pt-1), 'double'),
-                                       Module.getValue(ptr + 16*(n_pt-1) + 8, 'double'));
-                            for (var j = n_pt - 2; j >= 0; --j) {
+                            ctx.moveTo(Module.getValue(ptr, 'double'),
+                                       Module.getValue(ptr + 8, 'double'));
+                            for (var j = 1; j < n_pt; ++j) {
                                 ctx.lineTo(Module.getValue(ptr + 16*j, 'double'),
                                            Module.getValue(ptr + 16*j + 8, 'double'));
                             }
                             if (get_line_closed_plus(i)) {
-                                ctx.lineTo(Module.getValue(ptr + 16*(n_pt-1), 'double'),
-                                           Module.getValue(ptr + 16*(n_pt-1) + 8, 'double'));
+                                ctx.lineTo(Module.getValue(ptr, 'double'),
+                                           Module.getValue(ptr + 8, 'double'));
                             } else {
-                                traverse_boundary(Module.getValue(ptr, 'double'),
-                                                  Module.getValue(ptr + 8, 'double'),
-                                                  Module.getValue(ptr + 16*(n_pt-1), 'double'),
+                                traverse_boundary(Module.getValue(ptr + 16*(n_pt-1), 'double'),
                                                   Module.getValue(ptr + 16*(n_pt-1) + 8, 'double'),
-                                                  'cw');
+                                                  Module.getValue(ptr, 'double'),
+                                                  Module.getValue(ptr + 8, 'double'),
+                                                  'ccw');
                             }
                         }
+                    }
+                    if (!ctx.isPointInPath(tx, ty, 'evenodd')) {
+                        ctx.rect(0, 0, canvas.width, canvas.height);
                     }
                     ctx.fill('evenodd');
                     ctx.stroke();
