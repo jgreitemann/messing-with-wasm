@@ -8,7 +8,7 @@ EMRUN = source ~/opensource/emsdk/emsdk_env.sh && emrun
 EMCC = source ~/opensource/emsdk/emsdk_env.sh && emcc
 EM_OPT = -s DISABLE_EXCEPTION_CATCHING=0
 EM_EXEX = -s 'EXTRA_EXPORTED_RUNTIME_METHODS=["ccall", "cwrap", "getValue", "setValue"]'
-EM_EX = -s EXPORTED_FUNCTIONS='["_main", "_add_point", "_clear_points", "_get_model", "_get_SV_coord", "_get_err_string", "_get_n_lines_zero", "_get_n_line_points_zero", "_get_line_points_zero", "_get_line_closed_zero", "_get_n_lines_plus", "_get_n_line_points_plus", "_get_line_points_plus", "_get_line_closed_plus", "_get_n_lines_minus", "_get_n_line_points_minus", "_get_line_points_minus", "_get_line_closed_minus"]'
+EM_EX = -s EXPORTED_FUNCTIONS='["_main", "_add_point", "_clear_points", "_get_model_linear", "_get_model_quadratic", "_get_model_rbf", "_get_model_sigmoid", "_get_SV_coord", "_get_err_string", "_get_n_lines_zero", "_get_n_line_points_zero", "_get_line_points_zero", "_get_line_closed_zero", "_get_n_lines_plus", "_get_n_line_points_plus", "_get_line_points_plus", "_get_line_closed_plus", "_get_n_lines_minus", "_get_n_line_points_minus", "_get_line_points_minus", "_get_line_closed_minus", "_get_model_coeffs"]'
 
 INCLUDES = -I../svm -I../svm/libsvm -I../colormap
 CXXFLAGS = -std=c++1z -O3

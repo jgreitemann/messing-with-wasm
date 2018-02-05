@@ -8,7 +8,12 @@ var Module = {
     postRun: function () {
         add_point = Module.cwrap('add_point', null, ['number', 'number', 'number']);
         clear_points = Module.cwrap('clear_points', null, []);
-        get_model = Module.cwrap('get_model', 'number', ['number']);
+        get_model = {
+            'linear': Module.cwrap('get_model_linear', 'number', ['number']),
+            'quadratic': Module.cwrap('get_model_quadratic', 'number', ['number']),
+            'rbf': Module.cwrap('get_model_rbf', 'number', ['number']),
+            'sigmoid': Module.cwrap('get_model_sigmoid', 'number', ['number'])
+        };
         get_SV_coord = Module.cwrap('get_SV_coord', 'number', ['number']);
 
         get_n_lines_zero = Module.cwrap('get_n_lines_zero', 'number', []);
@@ -81,6 +86,7 @@ window.onload = function () {
             return 1;
         if (Math.abs(y - canvas.height) < eps)
             return 2;
+        return -1;
     }
 
     function traverse_boundary(ax, ay, bx, by, dir) {
@@ -135,19 +141,21 @@ window.onload = function () {
 
         if (nice.length > 0 && naughty.length > 0) {
             warning.style = "display: none;";
-            var ptr = get_model(nu);
-            if (ptr != 0) {
+            var res = get_model['quadratic'](nu);
+            if (res != -1) {
                 hide_exception();
-                var a = Module.getValue(ptr, 'double');
-                var b = Module.getValue(ptr+8, 'double');
-                var rho = Module.getValue(ptr+16, 'double');
-
-                console.log('a = ' + a + ', b = ' + b + ', rho = ' + rho);
 
                 ctx.strokeStyle = '#999999';
                 ctx.lineWidth = 1;
                 ctx.fillStyle = '#dddddd';
-                if (false) {
+                var a, b, rho;
+                if (res == 1) {
+                    var ptr = Module.ccall('get_model_coeffs', 'number', [], []);
+                    a = Module.getValue(ptr, 'double');
+                    b = Module.getValue(ptr+8, 'double');
+                    rho = Module.getValue(ptr+16, 'double');
+                    console.log('a = ' + a + ', b = ' + b + ', rho = ' + rho);
+
                     ctx.beginPath();
                     ctx.moveTo(0, (rho - 1) / b);
                     ctx.lineTo(canvas.width, (rho - 1 - a * canvas.width) / b);
@@ -220,7 +228,7 @@ window.onload = function () {
 
                 ctx.strokeStyle = 'black';
                 ctx.lineWidth = 2;
-                if (false) {
+                if (res == 1) {
                     ctx.beginPath();
                     ctx.moveTo(0, rho / b);
                     ctx.lineTo(canvas.width, (rho - a * canvas.width) / b);
