@@ -1,9 +1,17 @@
+body {
+    overflow-y: scroll;
+}
+
 #canvas {
     border: 1px solid black;
 }
 
-#nu-text {
+.short-text {
     width: 2em;
+}
+
+.longer-text {
+    width: 4em;
 }
 
 #nu-slider {
