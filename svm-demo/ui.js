@@ -50,6 +50,13 @@ window.onload = function () {
     var gamma_text = document.getElementById('gamma-text');
     var c0_text = document.getElementById('c0-text');
 
+    var formulae = {
+        'linear': document.getElementById('linear-kernel-formula'),
+        'quadratic': document.getElementById('quadratic-kernel-formula'),
+        'rbf': document.getElementById('rbf-kernel-formula'),
+        'sigmoid': document.getElementById('sigmoid-kernel-formula')
+    };
+
     var warning = document.getElementById('two-class-warning');
     var exception_box = document.getElementById('exception');
     var exception_text = document.getElementById('exception-text');
@@ -150,6 +157,12 @@ window.onload = function () {
         gamma_text.disabled = kernel_picker.value === 'linear';
         c0_text.disabled = (kernel_picker.value === 'linear'
                             || kernel_picker.value === 'rbf');
+        for (var other in formulae) {
+            if (other === kernel_picker.value)
+                formulae[other].style = 'display: visible;';
+            else
+                formulae[other].style = 'display: none;';
+        }
     }
 
     function redraw(bare) {
