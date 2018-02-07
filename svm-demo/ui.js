@@ -143,14 +143,14 @@ window.onload = function () {
         ctx.lineTo(bx, by);
     }
 
-    function redraw() {
+    function redraw(bare) {
         ctx.setTransform(sx, 0, 0, sy, mx, my);
         ctx.clearRect(boundingRect.origin.x, boundingRect.origin.y,
                       boundingRect.size.width, boundingRect.size.height);
 
         var r = 0.03;
 
-        if (nice.length > 0 && naughty.length > 0) {
+        if (!bare && nice.length > 0 && naughty.length > 0) {
             warning.style = "display: none;";
             var res = get_model['quadratic'](nu);
             if (res != -1) {
@@ -323,7 +323,7 @@ window.onload = function () {
             ctx.fillRect(pt.x - r, pt.y - r, 2*r, 2*r);
         });
 
-        if (SVcheckbox.checked) {
+        if (!bare && SVcheckbox.checked) {
             ctx.strokeStyle = 'blue';
             ctx.lineWidth = 0.006;
             var SV_ptr;
@@ -351,31 +351,31 @@ window.onload = function () {
 
         add_point(pos.x, pos.y, 1 ? event.button == 0 : -1);
 
-        redraw();
+        redraw(false);
     }, false);
 
     nu_text.onchange = function (event) {
         nu = parseFloat(nu_text.value);
         update_slider();
-        redraw();
+        redraw(false);
     };
 
     nu_slider.oninput = function (event) {
         nu = 0.01 * nu_slider.value;
         nu_text.value = nu;
-        redraw();
+        redraw(false);
     };
 
     SVcheckbox.onclick = function (event) {
-        redraw();
+        redraw(false);
     };
 
     document.getElementById('clear-button').onclick = function (event) {
         nice = [];
         naughty = [];
         clear_points();
-        redraw();
+        redraw(false);
     };
 
-    redraw();
+    redraw(true);
 };
