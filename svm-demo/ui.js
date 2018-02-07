@@ -1,3 +1,4 @@
+var eps = 0.001;
 var add_point;
 var clear_points;
 var get_model;
@@ -86,7 +87,6 @@ window.onload = function () {
     }
 
     function edge_index(x, y) {
-        var eps = 0.001;
         if (Math.abs(x - boundingRect.origin.x) < eps)
             return 3;
         if (Math.abs(y - boundingRect.origin.y) < eps)
@@ -282,9 +282,28 @@ window.onload = function () {
         }
 
         // coordinate system
-        ctx.setLineDash([0.05, 0.05]);
         ctx.strokeStyle = 'darkgray';
         ctx.lineWidth = 0.0025;
+        ctx.setLineDash([0.01, 0.02]);
+        ctx.beginPath();
+        for (var y = Math.ceil(boundingRect.origin.y);
+             y < boundingRect.origin.y + boundingRect.size.height; y += 1.) {
+            if (Math.abs(y) > eps) {
+                ctx.moveTo(boundingRect.origin.x, y);
+                ctx.lineTo(boundingRect.origin.x + boundingRect.size.width, y);
+            }
+        }
+        for (var x = Math.ceil(boundingRect.origin.x);
+             x < boundingRect.origin.x + boundingRect.size.width; x += 1.) {
+            if (Math.abs(x) > eps) {
+                ctx.moveTo(x, boundingRect.origin.y);
+                ctx.lineTo(x, boundingRect.origin.y + boundingRect.size.height);
+            }
+        }
+        ctx.stroke();
+        ctx.strokeStyle = '#555555';
+        ctx.lineWidth = 0.0025;
+        ctx.setLineDash([0.05, 0.05]);
         ctx.beginPath();
         ctx.moveTo(boundingRect.origin.x, 0);
         ctx.lineTo(boundingRect.origin.x + boundingRect.size.width, 0);
@@ -306,7 +325,7 @@ window.onload = function () {
 
         if (SVcheckbox.checked) {
             ctx.strokeStyle = 'blue';
-            ctx.lineWidth = 0.005;
+            ctx.lineWidth = 0.006;
             var SV_ptr;
             for (var i = 0; SV_ptr = get_SV_coord(i); ++i) {
                 var SV_x = Module.getValue(SV_ptr, 'double');
