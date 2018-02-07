@@ -46,6 +46,7 @@ window.onload = function () {
     var nu_slider = document.getElementById('nu-slider');
     var nu = parseFloat(nu_text.value);
     var SVcheckbox = document.getElementById('SVcheckbox');
+    var kernel_picker = document.getElementById('kernel-picker');
 
     var warning = document.getElementById('two-class-warning');
     var exception_box = document.getElementById('exception');
@@ -152,7 +153,10 @@ window.onload = function () {
 
         if (!bare && nice.length > 0 && naughty.length > 0) {
             warning.style = "display: none;";
-            var res = get_model['quadratic'](nu);
+            var kernel_name = kernel_picker.value;
+            if (!(kernel_name in get_model))
+                alert('Unknown kernel: ' + kernel_name);
+            var res = get_model[kernel_name](nu);
             if (res != -1) {
                 hide_exception();
 
@@ -374,6 +378,10 @@ window.onload = function () {
         nice = [];
         naughty = [];
         clear_points();
+        redraw(false);
+    };
+
+    kernel_picker.onclick = function (event) {
         redraw(false);
     };
 
