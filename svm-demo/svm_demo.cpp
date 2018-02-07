@@ -23,7 +23,7 @@ contour_closed_type line_closed_zero, line_closed_plus, line_closed_minus;
 contour_result_type calc_contour_lines (contour::scalar_fun_t func) {
     contour_result_type result;
     auto & [line_points, line_closed] = result;
-    contour::grid_type g {{99, {0, 981}}, {57, {0, 561}}};
+    contour::grid_type g {{71, {-3.5, 3.5}}, {41, {-2, 2}}};
     line_points.clear();
     line_closed.clear();
     auto lines = contour::contour_lines(func, g);

@@ -66,25 +66,34 @@ window.onload = function () {
     update_slider();
 
     var canvas = document.getElementById('canvas');
+    var boundingRect = {
+        origin: { x: -3.5, y: -2. },
+        size: { width: 7., height: 4. }
+    };
+    var sx = canvas.width / boundingRect.size.width;
+    var sy = canvas.height / boundingRect.size.height;
+    var mx = canvas.width / 2.;
+    var my = canvas.height / 2.;
+
     var ctx = canvas.getContext('2d');
 
     function getMousePos(evt) {
         var rect = canvas.getBoundingClientRect();
         return {
-            x: evt.clientX - rect.left,
-            y: evt.clientY - rect.top
+            x: (evt.clientX - rect.left - mx) / sx,
+            y: (evt.clientY - rect.top - my) / sy
         };
     }
 
     function edge_index(x, y) {
-        var eps = 0.1;
-        if (Math.abs(x) < eps)
+        var eps = 0.001;
+        if (Math.abs(x - boundingRect.origin.x) < eps)
             return 3;
-        if (Math.abs(y) < eps)
+        if (Math.abs(y - boundingRect.origin.y) < eps)
             return 0;
-        if (Math.abs(x - canvas.width) < eps)
+        if (Math.abs(x - boundingRect.origin.x - boundingRect.size.width) < eps)
             return 1;
-        if (Math.abs(y - canvas.height) < eps)
+        if (Math.abs(y - boundingRect.origin.y - boundingRect.size.height) < eps)
             return 2;
         return -1;
     }
@@ -98,16 +107,16 @@ window.onload = function () {
             if (dir == 'ccw') {
                 switch (current_edge) {
                 case 0:
-                    x = 0;
+                    x = boundingRect.origin.x;
                     break;
                 case 1:
-                    y = 0;
+                    y = boundingRect.origin.y;
                     break;
                 case 2:
-                    x = canvas.width;
+                    x = boundingRect.origin.x + boundingRect.size.width;
                     break;
                 case 3:
-                    y = canvas.height;
+                    y = boundingRect.origin.y + boundingRect.size.height;
                     break;
                 }
                 ctx.lineTo(x, y);
@@ -115,16 +124,16 @@ window.onload = function () {
             } else {
                 switch (current_edge) {
                 case 0:
-                    x = canvas.width;
+                    x = boundingRect.origin.x + boundingRect.size.width;
                     break;
                 case 1:
-                    y = canvas.height;
+                    y = boundingRect.origin.y + boundingRect.size.height;
                     break;
                 case 2:
-                    x = 0;
+                    x = boundingRect.origin.x;
                     break;
                 case 3:
-                    y = 0;
+                    y = boundingRect.origin.y;
                     break;
                 }
                 ctx.lineTo(x, y);
@@ -135,9 +144,11 @@ window.onload = function () {
     }
 
     function redraw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.setTransform(sx, 0, 0, sy, mx, my);
+        ctx.clearRect(boundingRect.origin.x, boundingRect.origin.y,
+                      boundingRect.size.width, boundingRect.size.height);
 
-        var r = 5;
+        var r = 0.03;
 
         if (nice.length > 0 && naughty.length > 0) {
             warning.style = "display: none;";
@@ -146,7 +157,7 @@ window.onload = function () {
                 hide_exception();
 
                 ctx.strokeStyle = '#999999';
-                ctx.lineWidth = 1;
+                ctx.lineWidth = 0.005;
                 ctx.fillStyle = '#dddddd';
                 var a, b, rho;
                 if (res == 1) {
@@ -157,10 +168,14 @@ window.onload = function () {
                     console.log('a = ' + a + ', b = ' + b + ', rho = ' + rho);
 
                     ctx.beginPath();
-                    ctx.moveTo(0, (rho - 1) / b);
-                    ctx.lineTo(canvas.width, (rho - 1 - a * canvas.width) / b);
-                    ctx.lineTo(canvas.width, (rho + 1 - a * canvas.width) / b);
-                    ctx.lineTo(0, (rho + 1) / b);
+                    ctx.moveTo(boundingRect.origin.x,
+                               (rho - 1 - a * boundingRect.origin.x) / b);
+                    ctx.lineTo(boundingRect.origin.x + boundingRect.size.width,
+                               (rho - 1 - a * (boundingRect.origin.x + boundingRect.size.width)) / b);
+                    ctx.lineTo(boundingRect.origin.x + boundingRect.size.width,
+                               (rho + 1 - a * (boundingRect.origin.x + boundingRect.size.width)) / b);
+                    ctx.lineTo(boundingRect.origin.x,
+                               (rho + 1 - a * boundingRect.origin.x) / b);
                     ctx.fill();
                     ctx.stroke();
                 } else {
@@ -219,19 +234,26 @@ window.onload = function () {
                             }
                         }
                     }
-                    if (!ctx.isPointInPath(tx, ty, 'evenodd')) {
-                        ctx.rect(0, 0, canvas.width, canvas.height);
+
+                    // isPointInPath uses canvas coordinate space: undo transform
+                    var ttx = tx * sx + mx;
+                    var tty = ty * sy + my;
+                    if (!ctx.isPointInPath(ttx, tty, 'evenodd')) {
+                        ctx.rect(boundingRect.origin.x, boundingRect.origin.y,
+                                 boundingRect.size.width, boundingRect.size.height);
                     }
                     ctx.fill('evenodd');
                     ctx.stroke();
                 }
 
                 ctx.strokeStyle = 'black';
-                ctx.lineWidth = 2;
+                ctx.lineWidth = 0.01;
                 if (res == 1) {
                     ctx.beginPath();
-                    ctx.moveTo(0, rho / b);
-                    ctx.lineTo(canvas.width, (rho - a * canvas.width) / b);
+                    ctx.moveTo(boundingRect.origin.x,
+                               (rho - a * boundingRect.origin.x) / b);
+                    ctx.lineTo(boundingRect.origin.x + boundingRect.size.width,
+                               (rho - a * (boundingRect.origin.x + boundingRect.size.width)) / b);
                     ctx.stroke();
                 } else {
                     var n_lines = get_n_lines_zero();
@@ -259,6 +281,18 @@ window.onload = function () {
             warning.style = "display: visible;";
         }
 
+        // coordinate system
+        ctx.setLineDash([0.05, 0.05]);
+        ctx.strokeStyle = 'darkgray';
+        ctx.lineWidth = 0.0025;
+        ctx.beginPath();
+        ctx.moveTo(boundingRect.origin.x, 0);
+        ctx.lineTo(boundingRect.origin.x + boundingRect.size.width, 0);
+        ctx.moveTo(0, boundingRect.origin.y);
+        ctx.lineTo(0, boundingRect.origin.y + boundingRect.size.height);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
         ctx.fillStyle = 'green';
         nice.forEach(function (pt) {
             ctx.beginPath();
@@ -272,6 +306,7 @@ window.onload = function () {
 
         if (SVcheckbox.checked) {
             ctx.strokeStyle = 'blue';
+            ctx.lineWidth = 0.005;
             var SV_ptr;
             for (var i = 0; SV_ptr = get_SV_coord(i); ++i) {
                 var SV_x = Module.getValue(SV_ptr, 'double');
@@ -322,4 +357,6 @@ window.onload = function () {
         clear_points();
         redraw();
     };
+
+    redraw();
 };
