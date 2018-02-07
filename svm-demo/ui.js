@@ -402,6 +402,7 @@ window.onload = function () {
         redraw(false);
     };
 
+    gamma_text.onclick = function (event) { gamma_text.select(); };
     gamma_text.onchange = function (event) {
         gamma = parseFloat(gamma_text.value);
         if (gamma != NaN) {
@@ -410,8 +411,10 @@ window.onload = function () {
         } else {
             alert('Invalid number');
         }
+        gamma_text.select();
     };
 
+    c0_text.onclick = function (event) { c0_text.select(); };
     c0_text.onchange = function (event) {
         c0 = parseFloat(c0_text.value);
         if (c0 != NaN) {
@@ -420,6 +423,7 @@ window.onload = function () {
         } else {
             alert('Invalid number');
         }
+        c0_text.select();
     };
 
     update_active_parameters();
