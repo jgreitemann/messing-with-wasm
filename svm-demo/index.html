@@ -15,7 +15,12 @@
             </div>
             <div class="ui neutral">
                 <span class="ui-cell centered">
-                    &nu; =
+                    <math>
+                        <mrow>
+                            <mi>&nu;</mi>
+                            <mo>=</mo>
+                        </mrow>
+                    </math>
                     <input type="text" id="nu-text" class="short-text" value="0.25" />
                     <input type="range" id="nu-slider" min="1" max="100" value="25" />
                 </span>
@@ -36,12 +41,132 @@
                         <option value="sigmoid">Sigmoid</option>
                     </select>
                 </span>
-                <span class="ui-cell centered">
-                    &gamma; =
-                    <input type="text" id="gamma-text" class="longer-text" value="1.0" />
+                <span id="linear-kernel-formula" class="ui-cell centered">
+                    <math>
+                        <mrow>
+                            <mi>K</mi>
+                            <mrow>
+                                <mo form="prefix">(</mo>
+                                <mi mathvariant="bold">x</mi>
+                                <mo>,</mo>
+                                <mi mathvariant="bold">y</mi>
+                                <mo form="postfix">)</mo>
+                            </mrow>
+                            <mo>=</mo>
+                            <mi mathvariant="bold">x</mi>
+                            <mo>&#x022C5;</mo>
+                            <mi mathvariant="bold">y</mi>
+                        </mrow>
+                    </math>
+                </span>
+                <span id="quadratic-kernel-formula" class="ui-cell centered">
+                    <math>
+                        <mrow>
+                            <mi>K</mi>
+                            <mrow>
+                                <mo form="prefix">(</mo>
+                                <mi mathvariant="bold">x</mi>
+                                <mo>,</mo>
+                                <mi mathvariant="bold">y</mi>
+                                <mo form="postfix">)</mo>
+                            </mrow>
+                            <mo>=</mo>
+                            <msup>
+                                <mrow>
+                                    <mo form="prefix">(</mo>
+                                    <mi>&gamma;</mi>
+                                    <mi mathvariant="bold">x</mi>
+                                    <mo>&#x022C5;</mo>
+                                    <mi mathvariant="bold">y</mi>
+                                    <mo>+</mo>
+                                    <msub>
+                                        <mi>c</mi>
+                                        <mn>0</mn>
+                                    </msub>
+                                    <mo form="postfix">)</mo>
+                                </mrow>
+                                <mn>2</mn>
+                            </msup>
+                        </mrow>
+                    </math>
+                </span>
+                <span id="rbf-kernel-formula" class="ui-cell centered">
+                    <math>
+                        <mrow>
+                            <mi>K</mi>
+                            <mrow>
+                                <mo form="prefix">(</mo>
+                                <mi mathvariant="bold">x</mi>
+                                <mo>,</mo>
+                                <mi mathvariant="bold">y</mi>
+                                <mo form="postfix">)</mo>
+                            </mrow>
+                            <mo>=</mo>
+                            <mi>exp</mi>
+                            <mrow>
+                                <mo form="prefix">(</mo>
+                                <mo>-</mo>
+                                <mi>&gamma;</mi>
+                                <mo>&#x02016;</mo>
+                                <mi mathvariant="bold">x</mi>
+                                <mo>-</mo>
+                                <mi mathvariant="bold">y</mi>
+                                <msup>
+                                    <mo>&#x02016;</mo>
+                                    <mn>2</mn>
+                                </msup>
+                                <mo form="postfix">)</mo>
+                            </mrow>
+                        </mrow>
+                    </math>
+                </span>
+                <span id="sigmoid-kernel-formula" class="ui-cell centered">
+                    <math>
+                        <mrow>
+                            <mi>K</mi>
+                            <mrow>
+                                <mo form="prefix">(</mo>
+                                <mi mathvariant="bold">x</mi>
+                                <mo>,</mo>
+                                <mi mathvariant="bold">y</mi>
+                                <mo form="postfix">)</mo>
+                            </mrow>
+                            <mo>=</mo>
+                            <mi>tanh</mi>
+                            <mrow>
+                                <mo form="prefix">(</mo>
+                                <mi>&gamma;</mi>
+                                <mi mathvariant="bold">x</mi>
+                                <mo>&#x022C5;</mo>
+                                <mi mathvariant="bold">y</mi>
+                                <mo>+</mo>
+                                <msub>
+                                    <mi>c</mi>
+                                    <mn>0</mn>
+                                </msub>
+                                <mo form="postfix">)</mo>
+                            </mrow>
+                        </mrow>
+                    </math>
                 </span>
                 <span class="ui-cell centered">
-                    c<sub>0</sub> =
+                    <math>
+                        <mrow>
+                            <mi>&gamma;</mi>
+                            <mo>=</mo>
+                        </mrow>
+                    </math>
+                    <input type="text" id="gamma-text" class="longer-text" value="1.0" />
+                    &nbsp;&nbsp;&nbsp;
+                    <math>
+                        <mrow>
+                            <msub>
+                                <mi>c</mi>
+                                <mn>0</mn>
+                            </msub>
+                            <mo>=</mo>
+                        </mrow>
+                    </math>
                     <input type="text" id="c0-text" class="longer-text" value="0.0" />
                 </span>
             </div>
