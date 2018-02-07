@@ -10,10 +10,10 @@ var Module = {
         add_point = Module.cwrap('add_point', null, ['number', 'number', 'number']);
         clear_points = Module.cwrap('clear_points', null, []);
         get_model = {
-            'linear': Module.cwrap('get_model_linear', 'number', ['number']),
-            'quadratic': Module.cwrap('get_model_quadratic', 'number', ['number']),
-            'rbf': Module.cwrap('get_model_rbf', 'number', ['number']),
-            'sigmoid': Module.cwrap('get_model_sigmoid', 'number', ['number'])
+            'linear': Module.cwrap('get_model_linear', 'number', ['number', 'number', 'number']),
+            'quadratic': Module.cwrap('get_model_quadratic', 'number', ['number', 'number', 'number']),
+            'rbf': Module.cwrap('get_model_rbf', 'number', ['number', 'number', 'number']),
+            'sigmoid': Module.cwrap('get_model_sigmoid', 'number', ['number', 'number', 'number'])
         };
         get_SV_coord = Module.cwrap('get_SV_coord', 'number', ['number']);
 
@@ -47,6 +47,8 @@ window.onload = function () {
     var nu = parseFloat(nu_text.value);
     var SVcheckbox = document.getElementById('SVcheckbox');
     var kernel_picker = document.getElementById('kernel-picker');
+    var gamma_text = document.getElementById('gamma-text');
+    var c0_text = document.getElementById('c0-text');
 
     var warning = document.getElementById('two-class-warning');
     var exception_box = document.getElementById('exception');
@@ -144,6 +146,12 @@ window.onload = function () {
         ctx.lineTo(bx, by);
     }
 
+    function update_active_parameters() {
+        gamma_text.disabled = kernel_picker.value === 'linear';
+        c0_text.disabled = (kernel_picker.value === 'linear'
+                            || kernel_picker.value === 'rbf');
+    }
+
     function redraw(bare) {
         ctx.setTransform(sx, 0, 0, sy, mx, my);
         ctx.clearRect(boundingRect.origin.x, boundingRect.origin.y,
@@ -154,9 +162,11 @@ window.onload = function () {
         if (!bare && nice.length > 0 && naughty.length > 0) {
             warning.style = "display: none;";
             var kernel_name = kernel_picker.value;
+            var gamma = parseFloat(gamma_text.value);
+            var c0 = parseFloat(c0_text.value);
             if (!(kernel_name in get_model))
                 alert('Unknown kernel: ' + kernel_name);
-            var res = get_model[kernel_name](nu);
+            var res = get_model[kernel_name](nu, gamma, c0);
             if (res != -1) {
                 hide_exception();
 
@@ -360,8 +370,13 @@ window.onload = function () {
 
     nu_text.onchange = function (event) {
         nu = parseFloat(nu_text.value);
-        update_slider();
-        redraw(false);
+        if (nu != NaN) {
+            nu_text.value = nu;
+            update_slider();
+            redraw(false);
+        } else {
+            alert('Invalid number');
+        }
     };
 
     nu_slider.oninput = function (event) {
@@ -378,12 +393,35 @@ window.onload = function () {
         nice = [];
         naughty = [];
         clear_points();
+        hide_exception();
         redraw(false);
     };
 
     kernel_picker.onclick = function (event) {
+        update_active_parameters();
         redraw(false);
     };
 
+    gamma_text.onchange = function (event) {
+        gamma = parseFloat(gamma_text.value);
+        if (gamma != NaN) {
+            gamma_text.value = gamma;
+            redraw(false);
+        } else {
+            alert('Invalid number');
+        }
+    };
+
+    c0_text.onchange = function (event) {
+        c0 = parseFloat(c0_text.value);
+        if (c0 != NaN) {
+            c0_text.value = c0;
+            redraw(false);
+        } else {
+            alert('Invalid number');
+        }
+    };
+
+    update_active_parameters();
     redraw(true);
 };

@@ -41,7 +41,7 @@ contour_result_type calc_contour_lines (contour::scalar_fun_t func) {
 }
 
 template <typename Kernel>
-int get_model (double nu) {
+int get_model (svm::parameters<Kernel> const& params) {
     svm::problem<Kernel> prob_local(2);
     for (size_t i = 0; i < prob.size(); ++i) {
         auto sample = prob[i];
@@ -50,7 +50,7 @@ int get_model (double nu) {
     err_str = "";
     try {
         SV_coords.clear();
-        svm::model<Kernel> model(std::move(prob_local), svm::parameters<Kernel>(nu));
+        svm::model<Kernel> model(std::move(prob_local), params);
         for (auto p : model)
             for (double c : p.second)
                 SV_coords.push_back(c);
@@ -74,7 +74,7 @@ int get_model (double nu) {
 }
 
 template <>
-int get_model<svm::kernel::linear> (double nu) {
+int get_model<svm::kernel::linear> (svm::parameters<svm::kernel::linear> const& params) {
     using Kernel = svm::kernel::linear;
     svm::problem<Kernel> prob_local(2);
     for (size_t i = 0; i < prob.size(); ++i) {
@@ -84,7 +84,7 @@ int get_model<svm::kernel::linear> (double nu) {
     err_str = "";
     try {
         SV_coords.clear();
-        svm::model<Kernel> model(std::move(prob_local), svm::parameters<Kernel>(nu));
+        svm::model<Kernel> model(std::move(prob_local), params);
         for (auto p : model)
             for (double c : p.second)
                 SV_coords.push_back(c);
@@ -115,20 +115,29 @@ extern "C" {
         SV_coords.clear();
     }
 
-    int get_model_linear (double nu) {
-        return get_model<svm::kernel::linear>(nu);
+    int get_model_linear (double nu, double gamma, double c0) {
+        svm::parameters<svm::kernel::linear> params(nu);
+        return get_model<svm::kernel::linear>(params);
     }
 
-    int get_model_quadratic (double nu) {
-        return get_model<svm::kernel::polynomial<2>>(nu);
+    int get_model_quadratic (double nu, double gamma, double c0) {
+        svm::parameters<svm::kernel::polynomial<2>> params(nu);
+        params.gamma() = gamma;
+        params.coef0() = c0;
+        return get_model<svm::kernel::polynomial<2>>(params);
     }
 
-    int get_model_rbf (double nu) {
-        return get_model<svm::kernel::rbf>(nu);
+    int get_model_rbf (double nu, double gamma, double c0) {
+        svm::parameters<svm::kernel::rbf> params(nu);
+        params.gamma() = gamma;
+        return get_model<svm::kernel::rbf>(params);
     }
 
-    int get_model_sigmoid (double nu) {
-        return get_model<svm::kernel::sigmoid>(nu);
+    int get_model_sigmoid (double nu, double gamma, double c0) {
+        svm::parameters<svm::kernel::sigmoid> params(nu);
+        params.gamma() = gamma;
+        params.coef0() = c0;
+        return get_model<svm::kernel::sigmoid>(params);
     }
 
     double const * get_SV_coord (size_t i) {

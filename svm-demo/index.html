@@ -16,7 +16,7 @@
             <div class="ui neutral">
                 <span class="ui-cell centered">
                     &nu; =
-                    <input type="text" id="nu-text" value="0.25" />
+                    <input type="text" id="nu-text" class="short-text" value="0.25" />
                     <input type="range" id="nu-slider" min="1" max="100" value="25" />
                 </span>
                 <span class="ui-cell centered">
@@ -35,6 +35,14 @@
                         <option value="rbf">Radial Basis Functions</option>
                         <option value="sigmoid">Sigmoid</option>
                     </select>
+                </span>
+                <span class="ui-cell centered">
+                    &gamma; =
+                    <input type="text" id="gamma-text" class="short-text" value="1.0" />
+                </span>
+                <span class="ui-cell centered">
+                    c<sub>0</sub> =
+                    <input type="text" id="c0-text" class="short-text" value="0.0" />
                 </span>
             </div>
             <div class="ui error" id="exception">
