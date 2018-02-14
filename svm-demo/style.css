@@ -17,3 +17,19 @@ body {
 #nu-slider {
     transform: translateY(+30%);
 }
+
+#primary-green {
+    display: inline;
+}
+
+.toggled #primary-green {
+    display: none;
+}
+
+#primary-red {
+    display: none;
+}
+
+.toggled #primary-red {
+    display: inline;
+}

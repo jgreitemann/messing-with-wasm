@@ -49,6 +49,7 @@ window.onload = function () {
     var kernel_picker = document.getElementById('kernel-picker');
     var gamma_text = document.getElementById('gamma-text');
     var c0_text = document.getElementById('c0-text');
+    var primary = 1;
 
     var formulae = {
         'linear': document.getElementById('linear-kernel-formula'),
@@ -370,13 +371,14 @@ window.onload = function () {
 
         console.log(pos.x + ', ' + pos.y + ': ' + event.button);
 
-        if (event.button == 0) {
+        var label = ((event.button == 0) ? 1 : -1) * primary;
+        if (label > 0) {
             nice.push(pos);
         } else {
             naughty.push(pos);
         }
 
-        add_point(pos.x, pos.y, 1 ? event.button == 0 : -1);
+        add_point(pos.x, pos.y, label);
 
         redraw(false);
     }, false);
@@ -401,6 +403,11 @@ window.onload = function () {
     SVcheckbox.onclick = function (event) {
         redraw(false);
     };
+
+    document.getElementById('class-toggle').onclick = function (event) {
+        document.getElementById('class-toggle').classList.toggle('toggled');
+        primary *= -1;
+    }
 
     document.getElementById('clear-button').onclick = function (event) {
         nice = [];
