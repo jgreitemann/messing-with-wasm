@@ -1,0 +1,5 @@
+Makefile
+_data/*
+_gp/*
+*.cpp
+worker.in.js
