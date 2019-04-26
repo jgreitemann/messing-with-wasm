@@ -1,0 +1,7 @@
+_data/*.c
+biases.cpp
+gnuplot_*.js
+!gnuplot_common.js
+graph_analysis.js
+graph_analysis.wasm
+worker.js
