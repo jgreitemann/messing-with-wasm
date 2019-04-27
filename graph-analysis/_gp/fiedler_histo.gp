@@ -1,9 +1,10 @@
-set terminal canvas size 300,200
+set terminal canvas size 300,220
 set output 'fiedler_histo.html'
 
-set margins 5.5,2,3,1
+set margins 5.5,2,4.5,0.2
 
 set xrange [-0.06:0.08]
+set xlabel 'Fiedler vector entries' offset 0,-2.4
 set yrange [0:110]
 set ylabel 'abs. frequency' offset 2,0
 

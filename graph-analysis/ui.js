@@ -264,6 +264,9 @@ window.onload = function () {
         rhoc_slider.value = Math.log10(rhoc);
     }
 
+    rhoc_text.onclick = function(event) {
+        rhoc_text.select();
+    }
     rhoc_text.onchange = function(event) {
         rhoc = parseFloat(rhoc_text.value);
         if (rhoc != NaN) {
@@ -273,6 +276,7 @@ window.onload = function () {
         } else {
             alert('Invalid number');
         }
+        rhoc_text.select();
     };
 
     rhoc_slider.oninput = function(event) {

@@ -3,8 +3,9 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-        <link rel="stylesheet" type="text/css" href="style.css" />
+        <title>Pyrochlore Graph Analysis</title>
         <link rel="stylesheet" type="text/css" href="../ui.css" />
+        <link rel="stylesheet" type="text/css" href="style.css" />
         <script type="text/javascript" src="canvasmath.js"></script>
         <script type="text/javascript" src="gnuplot_common.js"></script>
         <script type="text/javascript" src="gnuplot_graph.js"></script>
@@ -20,33 +21,55 @@
                 <canvas id="gnuplot_graph_canvas" width="400" height="250"></canvas>
                 <canvas id="gnuplot_histo_canvas" width="300" height="300"></canvas>
                 <canvas id="gnuplot_fiedler_canvas" width="400" height="250"></canvas>
-                <canvas id="gnuplot_fiedler_histo_canvas" width="300" height="200"></canvas>
+                <canvas id="gnuplot_fiedler_histo_canvas" width="300" height="220"></canvas>
             </div>
             <div class="ui neutral">
-                <span class="ui-cell centered">
-                    Tensorial kernel:
-                    <select id="rank-select">
-                        <option value="1">Rank 1</option>
-                        <option value="2" selected>Rank 2</option>
-                        <option value="3">Rank 3</option>
-                        <option value="4">Rank 4</option>
-                    </select>
-                </span>
+                <h1>Input data selection</h1>
+                <div>
+                    <span class="ui-cell centered">
+                        <label for="rank-select">
+                            Tensorial kernel:
+                        </label>
+                        <select id="rank-select">
+                            <option value="1">Rank 1</option>
+                            <option value="2" selected>Rank 2</option>
+                            <option value="3">Rank 3</option>
+                            <option value="4">Rank 4</option>
+                        </select>
+                    </span>
+                    <label class="ui-cell centered">
+                        <input type="checkbox" id="mask-check" />
+                        Mask AF phase points
+                    </label>
+                </div>
             </div>
             <div class="ui neutral">
-                <span class="ui-cell centered">
-                    <math>
-                        <mrow>
-                            <msub>
-                                <mi>&rho;</mi>
-                                <mi>c</mi>
-                            </msub>
-                            <mo>=</mo>
-                        </mrow>
-                    </math>
-                    <input type="text" id="rhoc-text" class="short-text" value="50" />
-                    <input type="range" id="rhoc-slider" min="-2" max="5" value="1.699" step="0.1" />
-                </span>
+                <h1>Graph weighting</h1>
+                <div>
+                    <label class="ui-cell centered">
+                        Weighting function:
+                        <select id="func-select">
+                            <option value="box">Heaviside</option>
+                            <option value="lorentzian">Lorentzian</option>
+                            <option value="gaussian">Gaussian</option>
+                        </select>
+                    </label>
+                    <span class="ui-cell centered">
+                        <label>
+                            <math>
+                                <mrow>
+                                    <msub>
+                                        <mi>&rho;</mi>
+                                        <mi>c</mi>
+                                    </msub>
+                                    <mo>=</mo>
+                                </mrow>
+                            </math>
+                            <input type="text" id="rhoc-text" class="longer-text" value="50" />
+                        </label>
+                        <input type="range" id="rhoc-slider" min="-2" max="5" value="1.699" step="0.1" />
+                    </span>
+                </div>
             </div>
         </div>
     </body>

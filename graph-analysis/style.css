@@ -1,7 +1,45 @@
+.ui {
+	display: block;
+	width: 100%;
+	max-width: 700px;
+	border-width: 2px;
+}
+
+.ui > h1 {
+	background: #4f8fd8;
+	margin: 0px;
+	padding: 5px 16px;
+	color: white;
+	font-family: sans-serif;
+	font-size: 100%;
+	border-width: 2px 2px 0px 2px;
+	border-radius: 0.75em 0.75em 0em 0em;
+}
+
+.ui > div {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: baseline;
+	width: 100%;
+}
+
+.short-text {
+    width: 2em;
+}
+
+.longer-text {
+    width: 4em;
+}
+
 #canvas-container {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
 	align-items: center;
 	justify-content: space-evenly;
+}
+
+input[type="range"] {
+    transform: translateY(+30%);
 }
