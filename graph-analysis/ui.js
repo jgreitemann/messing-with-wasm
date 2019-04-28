@@ -202,7 +202,6 @@ window.onload = function () {
     var fiedler_ready = false;
 
     var mask_check = document.getElementById('mask-check');
-    var rank_select = document.getElementById('rank-select');
     var func_select = document.getElementById('func-select');
 
     function update() {
@@ -220,7 +219,9 @@ window.onload = function () {
         }
     }
     mask_check.onchange = update;
-    rank_select.onchange = update;
+    document.querySelectorAll('input[name="rank-select"]').forEach(function(e) {
+        e.onchange = update;
+    })
 
     misc_worker.onmessage = function(event) {
         var msg = event.data;
@@ -234,11 +235,12 @@ window.onload = function () {
             if (misc_ready && fiedler_ready)
                 update();
         } else if (msg.action == 'get_rhoc') {
+            var rank = parseInt(document.querySelector('input[name="rank-select"]:checked').value);
             misc_worker.postMessage({
                 action: 'current_rhoc',
                 calc_fiedler: false,
                 use_mask: mask_check.checked,
-                rank: parseInt(rank_select.options[rank_select.selectedIndex].value),
+                rank: rank,
                 func: func_select.selectedIndex,
                 rhoc: rhoc
             });
@@ -256,11 +258,12 @@ window.onload = function () {
             if (misc_ready && fiedler_ready)
                 update();
         } else if (msg.action == 'get_rhoc') {
+            var rank = parseInt(document.querySelector('input[name="rank-select"]:checked').value);
             fiedler_worker.postMessage({
                 action: 'current_rhoc',
                 calc_fiedler: true,
                 use_mask: mask_check.checked,
-                rank: parseInt(rank_select.options[rank_select.selectedIndex].value),
+                rank: rank,
                 func: func_select.selectedIndex,
                 rhoc: rhoc
             });

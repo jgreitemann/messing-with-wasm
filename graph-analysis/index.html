@@ -27,15 +27,23 @@
                 <h1>Input data selection</h1>
                 <div>
                     <span class="ui-cell">
-                        <label for="rank-select">
-                            Tensorial kernel:
+                        Tensorial kernel rank:
+                        <label>
+                            <input type="radio" name="rank-select" value="1" />
+                            1
                         </label>
-                        <select id="rank-select">
-                            <option value="1">Rank 1</option>
-                            <option value="2" selected>Rank 2</option>
-                            <option value="3">Rank 3</option>
-                            <option value="4">Rank 4</option>
-                        </select>
+                        <label>
+                            <input type="radio" name="rank-select" value="2" checked />
+                            2
+                        </label>
+                        <label>
+                            <input type="radio" name="rank-select" value="3" />
+                            3
+                        </label>
+                        <label>
+                            <input type="radio" name="rank-select" value="4" />
+                            4
+                        </label>
                     </span>
                     <label class="ui-cell">
                         <input type="checkbox" id="mask-check" checked />
