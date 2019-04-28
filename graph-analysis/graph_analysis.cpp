@@ -22,7 +22,8 @@ const color::map<rgb_t> spectral_mod {
     {7.0 / 7, rgb_t{0x32, 0x88, 0xbd}},
 };
 
-constexpr size_t Np = 493;
+constexpr int w = 29, h = 17;
+constexpr size_t Np = w * h;
 constexpr size_t N = Np * (Np - 1) / 2;
 
 extern int mask[Np];
@@ -42,7 +43,7 @@ extern "C" {
         return biases[rank - 1];
     }
 
-    void get_weights(double *biases, int func, double rhoc, double *weights) {
+    void get_weights(double *biases, int func, double rhoc, double radius, double *weights) {
         auto weight = [&]() -> std::function<double(double)> {
             if (func == 0) {
                 return [rhoc](double rho) {
@@ -71,14 +72,19 @@ extern "C" {
                 *(weights++) = weight(x);
             }
         } else {
-            for (size_t i = 0; i < N; ++i) {
-                *(weights++) = weight(biases[i]);
+            for (int l = 0, i = 0; l < Np - 1; ++l) {
+                for (int m = l + 1; m < Np; ++m, ++i) {
+                    double dist_sq = std::pow(m / w - l / w, 2)
+                        + std::pow(m % w - l % w, 2);
+                    dist_sq *= 0.05 * 0.05;
+                    *(weights++) = (dist_sq < std::pow(radius, 2)) ? weight(biases[i]) : 0;
+                }
             }
         }
 
     }
 
-    void compute_bias_histo(double *biases, int *histo, bool use_mask) {
+    void compute_bias_histo(double *biases, int *histo, bool use_mask, double radius) {
         size_t N_bin = 49;
         double log_min = -2, log_max = std::log10(2000.);
         for (size_t i = 0; i < N_bin; ++i)
@@ -86,6 +92,11 @@ extern "C" {
         for (size_t l = 0, i = 0; l < Np - 1; ++l) {
             for (size_t m = l + 1; m < Np; ++m, ++i) {
                 if (use_mask && (!mask[l] || !mask[m]))
+                    continue;
+                double dist_sq = std::pow(m / w - l / w, 2)
+                    + std::pow(m % w - l % w, 2);
+                dist_sq *= 0.05 * 0.05;
+                if (dist_sq > std::pow(radius, 2))
                     continue;
                 double log_bias = std::log10(biases[i]);
                 if (log_bias < log_min)

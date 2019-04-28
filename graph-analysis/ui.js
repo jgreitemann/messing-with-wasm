@@ -1,5 +1,3 @@
-var rhoc = 50;
-
 var grid_dx, grid_dy;
 var boundingRect;
 var points = [];
@@ -202,7 +200,17 @@ window.onload = function () {
     var fiedler_ready = false;
 
     var mask_check = document.getElementById('mask-check');
+    var radius_text = document.getElementById('radius-text');
+    var radius_slider = document.getElementById('radius-slider');
     var func_select = document.getElementById('func-select');
+    var rhoc_text = document.getElementById('rhoc-text');
+    var rhoc_slider = document.getElementById('rhoc-slider');
+
+    var func_math = {
+        'box': document.getElementById('box-math'),
+        'lorentzian': document.getElementById('lorentzian-math'),
+        'gaussian': document.getElementById('gaussian-math')
+    };
 
     function update() {
         if (misc_pending < 2) {
@@ -218,10 +226,6 @@ window.onload = function () {
             });
         }
     }
-    mask_check.onchange = update;
-    document.querySelectorAll('input[name="rank-select"]').forEach(function(e) {
-        e.onchange = update;
-    })
 
     misc_worker.onmessage = function(event) {
         var msg = event.data;
@@ -236,13 +240,16 @@ window.onload = function () {
                 update();
         } else if (msg.action == 'get_rhoc') {
             var rank = parseInt(document.querySelector('input[name="rank-select"]:checked').value);
+            var rhoc = parseFloat(rhoc_text.value);
+            var radius = parseFloat(radius_text.value);
             misc_worker.postMessage({
                 action: 'current_rhoc',
                 calc_fiedler: false,
                 use_mask: mask_check.checked,
                 rank: rank,
                 func: func_select.selectedIndex,
-                rhoc: rhoc
+                rhoc: rhoc,
+                radius: radius
             });
         }
     };
@@ -259,25 +266,24 @@ window.onload = function () {
                 update();
         } else if (msg.action == 'get_rhoc') {
             var rank = parseInt(document.querySelector('input[name="rank-select"]:checked').value);
+            var rhoc = parseFloat(rhoc_text.value);
+            var radius = parseFloat(radius_text.value);
             fiedler_worker.postMessage({
                 action: 'current_rhoc',
                 calc_fiedler: true,
                 use_mask: mask_check.checked,
                 rank: rank,
                 func: func_select.selectedIndex,
-                rhoc: rhoc
+                rhoc: rhoc,
+                radius: radius
             });
         }
     };
 
-
-    var rhoc_text = document.getElementById('rhoc-text');
-    var rhoc_slider = document.getElementById('rhoc-slider');
-    var func_math = {
-        'box': document.getElementById('box-math'),
-        'lorentzian': document.getElementById('lorentzian-math'),
-        'gaussian': document.getElementById('gaussian-math')
-    };
+    mask_check.onchange = update;
+    document.querySelectorAll('input[name="rank-select"]').forEach(function(e) {
+        e.onchange = update;
+    })
 
     function update_func() {
         for (var key in func_math) {
@@ -295,14 +301,16 @@ window.onload = function () {
     };
 
     function update_slider() {
-        rhoc_slider.value = Math.log10(rhoc);
+        rhoc_slider.value = Math.log10(parseFloat(rhoc_text.value));
+        radius_slider.value = parseFloat(radius_text.value);
     }
+    update_slider();
 
     rhoc_text.onclick = function(event) {
         rhoc_text.select();
     }
     rhoc_text.onchange = function(event) {
-        rhoc = parseFloat(rhoc_text.value);
+        var rhoc = parseFloat(rhoc_text.value);
         if (rhoc != NaN) {
             rhoc_text.value = rhoc;
             update_slider();
@@ -314,13 +322,31 @@ window.onload = function () {
     };
 
     rhoc_slider.oninput = function(event) {
-        rhoc = Math.pow(10, rhoc_slider.value);
+        var rhoc = Math.pow(10, rhoc_slider.value);
         rhoc_text.value = rhoc;
         update();
     };
 
-    rhoc = parseFloat(rhoc_text.value);
-    update_slider();
+    radius_text.onclick = function(event) {
+        radius_text.select();
+    }
+    radius_text.onchange = function(event) {
+        var radius = parseFloat(radius_text.value);
+        if (radius != NaN) {
+            radius_text.value = radius;
+            update_slider();
+            update();
+        } else {
+            alert('Invalid number');
+        }
+        radius_text.select();
+    };
+
+    radius_slider.oninput = function(event) {
+        radius_text.value = radius_slider.value;
+        update();
+    };
+
 
     gnuplot_fiedler_canvas();
 
