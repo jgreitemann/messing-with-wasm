@@ -1,5 +1,3 @@
-var rhoc = 50;
-
 var grid_dx, grid_dy;
 var boundingRect;
 var points = [];
@@ -32,7 +30,7 @@ function redraw_fiedler(fiedler_bitmap) {
     gnuplot.TR(204.5 * 10, 243 * 10, 0, 8, "Center", "-");
 }
 
-function redraw_graph(weight_data) {
+function redraw_graph(weight_data, mask_data) {
     var canvas = document.getElementById('gnuplot_graph_canvas');
     var ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -42,11 +40,13 @@ function redraw_graph(weight_data) {
 
     ctx.fillStyle = 'rgb(0%, 42%, 80%)';
 
-    points.forEach(function(p) {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 1, 0, 2 * Math.PI);
-        ctx.fill();
-    });
+    for (var i = 0; i < points.length; ++i) {
+        if (!mask_data || mask_data[i]) {
+            ctx.beginPath();
+            ctx.arc(points[i].x, points[i].y, 1, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+    }
 
     var sum = weight_data.reduce((a, b) => a + b, 0);
     if (sum > 2e4) {
@@ -58,6 +58,8 @@ function redraw_graph(weight_data) {
     var k = 0;
     for (var i = 0; i < points.length; ++i) {
         for(var j = i + 1; j < points.length; ++j, ++k) {
+            if (mask_data && (!mask_data[i] || !mask_data[j]))
+                continue;
             var w = weight_data[k];
             if (w > 1e-2) {
                 ctx.strokeStyle = `rgba(0%, 42%, 80%, ${100*w}%)`;
@@ -78,7 +80,7 @@ function redraw_histo(bias_histo_data, weight_histo_data, curve_data) {
 
     gnuplot_histo_canvas();
 
-    var N_bin = 50;
+    var N_bin = 49;
     var binwidth = gnuplot.plot_width / N_bin;
     var ybot = 115.;
     var phgt = 111.9;
@@ -197,7 +199,18 @@ window.onload = function () {
     var misc_ready = false;
     var fiedler_ready = false;
 
-    var rank_select = document.getElementById('rank-select');
+    var mask_check = document.getElementById('mask-check');
+    var radius_text = document.getElementById('radius-text');
+    var radius_slider = document.getElementById('radius-slider');
+    var func_select = document.getElementById('func-select');
+    var rhoc_text = document.getElementById('rhoc-text');
+    var rhoc_slider = document.getElementById('rhoc-slider');
+
+    var func_math = {
+        'box': document.getElementById('box-math'),
+        'lorentzian': document.getElementById('lorentzian-math'),
+        'gaussian': document.getElementById('gaussian-math')
+    };
 
     function update() {
         if (misc_pending < 2) {
@@ -213,12 +226,11 @@ window.onload = function () {
             });
         }
     }
-    rank_select.onchange = update;
 
     misc_worker.onmessage = function(event) {
         var msg = event.data;
         if (msg.action == 'redraw_graph') {
-            redraw_graph(msg.weight_data);
+            redraw_graph(msg.weight_data, mask_check.checked ? msg.mask_data : null);
         } else if (msg.action == 'redraw_histo') {
             redraw_histo(msg.bias_histo_data, msg.weight_histo_data, msg.curve_data);
             misc_pending--;
@@ -227,11 +239,17 @@ window.onload = function () {
             if (misc_ready && fiedler_ready)
                 update();
         } else if (msg.action == 'get_rhoc') {
+            var rank = parseInt(document.querySelector('input[name="rank-select"]:checked').value);
+            var rhoc = parseFloat(rhoc_text.value);
+            var radius = parseFloat(radius_text.value);
             misc_worker.postMessage({
                 action: 'current_rhoc',
                 calc_fiedler: false,
-                rank: parseInt(rank_select.options[rank_select.selectedIndex].value),
-                rhoc: rhoc
+                use_mask: mask_check.checked,
+                rank: rank,
+                func: func_select.selectedIndex,
+                rhoc: rhoc,
+                radius: radius
             });
         }
     };
@@ -247,25 +265,52 @@ window.onload = function () {
             if (misc_ready && fiedler_ready)
                 update();
         } else if (msg.action == 'get_rhoc') {
+            var rank = parseInt(document.querySelector('input[name="rank-select"]:checked').value);
+            var rhoc = parseFloat(rhoc_text.value);
+            var radius = parseFloat(radius_text.value);
             fiedler_worker.postMessage({
                 action: 'current_rhoc',
                 calc_fiedler: true,
-                rank: parseInt(rank_select.options[rank_select.selectedIndex].value),
-                rhoc: rhoc
+                use_mask: mask_check.checked,
+                rank: rank,
+                func: func_select.selectedIndex,
+                rhoc: rhoc,
+                radius: radius
             });
         }
     };
 
+    mask_check.onchange = update;
+    document.querySelectorAll('input[name="rank-select"]').forEach(function(e) {
+        e.onchange = update;
+    })
 
-    var rhoc_text = document.getElementById('rhoc-text');
-    var rhoc_slider = document.getElementById('rhoc-slider');
+    function update_func() {
+        for (var key in func_math) {
+            if (key == func_select.options[func_select.selectedIndex].value) {
+                func_math[key].style = 'display: inline;';
+            } else {
+                func_math[key].style = 'display: none;';
+            }
+        }
+    }
+    update_func();
+    func_select.onchange = function(event) {
+        update_func();
+        update();
+    };
 
     function update_slider() {
-        rhoc_slider.value = Math.log10(rhoc);
+        rhoc_slider.value = Math.log10(parseFloat(rhoc_text.value));
+        radius_slider.value = parseFloat(radius_text.value);
     }
+    update_slider();
 
+    rhoc_text.onclick = function(event) {
+        rhoc_text.select();
+    }
     rhoc_text.onchange = function(event) {
-        rhoc = parseFloat(rhoc_text.value);
+        var rhoc = parseFloat(rhoc_text.value);
         if (rhoc != NaN) {
             rhoc_text.value = rhoc;
             update_slider();
@@ -273,16 +318,37 @@ window.onload = function () {
         } else {
             alert('Invalid number');
         }
+        rhoc_text.select();
     };
 
     rhoc_slider.oninput = function(event) {
-        rhoc = Math.pow(10, rhoc_slider.value);
+        var rhoc = Math.pow(10, rhoc_slider.value);
+        var oom = Math.pow(10, Math.ceil(rhoc_slider.value));
+        rhoc = Math.round(rhoc / oom * 100) / 100 * oom;
         rhoc_text.value = rhoc;
         update();
     };
 
-    rhoc = parseFloat(rhoc_text.value);
-    update_slider();
+    radius_text.onclick = function(event) {
+        radius_text.select();
+    }
+    radius_text.onchange = function(event) {
+        var radius = parseFloat(radius_text.value);
+        if (radius != NaN) {
+            radius_text.value = radius;
+            update_slider();
+            update();
+        } else {
+            alert('Invalid number');
+        }
+        radius_text.select();
+    };
+
+    radius_slider.oninput = function(event) {
+        radius_text.value = radius_slider.value;
+        update();
+    };
+
 
     gnuplot_fiedler_canvas();
 
