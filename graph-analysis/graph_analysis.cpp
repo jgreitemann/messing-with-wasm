@@ -9,30 +9,33 @@
 #include <Eigen/Eigenvalues>
 #include "colormap.hpp"
 
-namespace {
-    using rgb = color::color<color::space::rgb>;
-}
+using rgb_t = color::color<color::space::rgb>;
 
-const color::map<rgb> spectral_mod {
-    {0.0 / 7, rgb{0xd5, 0x3e, 0x4f}},
-    {1.0 / 7, rgb{0xf4, 0x6d, 0x43}},
-    {3.0 / 7, rgb{0xfd, 0xae, 0x61}},
-    {4.6 / 7, rgb{0xfe, 0xe0, 0x8b}},
-    {4.8 / 7, rgb{0xe6, 0xf5, 0x98}},
-    {5.0 / 7, rgb{0xab, 0xdd, 0xa4}},
-    {5.2 / 7, rgb{0x66, 0xc2, 0xa5}},
-    {7.0 / 7, rgb{0x32, 0x88, 0xbd}},
+const color::map<rgb_t> spectral_mod {
+    {0.0 / 7, rgb_t{0xd5, 0x3e, 0x4f}},
+    {1.0 / 7, rgb_t{0xf4, 0x6d, 0x43}},
+    {3.0 / 7, rgb_t{0xfd, 0xae, 0x61}},
+    {4.6 / 7, rgb_t{0xfe, 0xe0, 0x8b}},
+    {4.8 / 7, rgb_t{0xe6, 0xf5, 0x98}},
+    {5.0 / 7, rgb_t{0xab, 0xdd, 0xa4}},
+    {5.2 / 7, rgb_t{0x66, 0xc2, 0xa5}},
+    {7.0 / 7, rgb_t{0x32, 0x88, 0xbd}},
 };
 
-constexpr size_t N = 121278;
-constexpr size_t graph_dim = 493;
+constexpr size_t Np = 493;
+constexpr size_t N = Np * (Np - 1) / 2;
 
+extern int mask[Np];
 extern double biases[][N];
 
 extern "C" {
 
     int main() {
 
+    }
+
+    int* get_mask() {
+        return mask;
     }
 
     double* get_biases(int rank) {
@@ -75,48 +78,61 @@ extern "C" {
 
     }
 
-    void compute_bias_histo(double *biases, int *histo) {
+    void compute_bias_histo(double *biases, int *histo, bool use_mask) {
         size_t N_bin = 50;
         double log_min = -2, log_max = 3;
         for (size_t i = 0; i < N_bin; ++i)
             histo[i] = 0;
-        for (size_t i = 0; i < N; ++i) {
-            double log_bias = std::log10(biases[i]);
-            if (log_bias < log_min)
-                continue;
-            size_t j = static_cast<size_t>((log_bias - log_min) / (log_max - log_min) * N_bin);
-            if (j < N_bin)
-                histo[j]++;
+        for (size_t l = 0, i = 0; l < Np - 1; ++l) {
+            for (size_t m = l + 1; m < Np; ++m, ++i) {
+                if (use_mask && (!mask[l] || !mask[m]))
+                    continue;
+                double log_bias = std::log10(biases[i]);
+                if (log_bias < log_min)
+                    continue;
+                size_t j = static_cast<size_t>((log_bias - log_min) / (log_max - log_min) * N_bin);
+                if (j < N_bin)
+                    histo[j]++;
+            }
         }
     }
 
-    void compute_weight_histo(double *weights, int *histo) {
+    void compute_weight_histo(double *weights, int *histo, bool use_mask) {
         size_t N_bin = 50;
         for (size_t i = 0; i < N_bin; ++i)
             histo[i] = 0;
-        for (size_t i = 0; i < N; ++i)
-            histo[std::min(static_cast<size_t>(weights[i] * N_bin), N_bin - 1)]++;
+        for (size_t l = 0, i = 0; l < Np - 1; ++l) {
+            for (size_t m = l + 1; m < Np; ++m, ++i) {
+                if (use_mask && (!mask[l] || !mask[m]))
+                    continue;
+                histo[std::min(static_cast<size_t>(weights[i] * N_bin), N_bin - 1)]++;
+            }
+        }
     }
 
-    size_t get_fiedler(double *weights, double *fiedler) {
+    size_t get_fiedler(double *weights, double *fiedler, bool use_mask) {
         using matrix_t = Eigen::MatrixXd;
+
+        int indices[Np];
+        size_t graph_dim = [&] {
+            size_t i, j = 0;
+            for (i = 0; i < Np; ++i)
+                indices[i] = (!use_mask || mask[i]) ? static_cast<int>(j++) : (-1);
+            return j;
+        }();
+
         matrix_t L = matrix_t::Zero(graph_dim, graph_dim);
-        for (size_t i = 0, k = 0; i < graph_dim - 1; ++i) {
-            for (size_t j = i + 1; j < graph_dim; ++j, ++k) {
+        for (size_t l = 0, k = 0; l < Np - 1; ++l) {
+            for (size_t m = l + 1; m < Np; ++m, ++k) {
                 double w = weights[k];
 
-                // os << std::abs(transition.rho()) << '\t' << w << '\n';
+                int i = indices[l], j = indices[m];
 
-                // if (index_map.find(labels.first) == index_map.end()
-                //     || index_map.find(labels.second) == index_map.end())
-                // {
-                //     continue;
-                // }
+                if (i < 0 || j < 0)
+                    continue;
 
                 // if (dist(phase_points[labels.first], phase_points[labels.second]) > radius)
                 //     continue;
-
-                // size_t i = index_map[labels.first], j = index_map[labels.second];
 
                 L(i,j) = -w;
                 L(j,i) = -w;
@@ -136,8 +152,6 @@ extern "C" {
         std::sort(evals.begin(), evals.end(),
                   [](auto const& lhs, auto const& rhs) { return lhs.second < rhs.second; });
 
-        double masked_value;
-        bool use_masked_value = false;
         auto fiedler_it = std::find_if(evals.begin(), evals.end(),
             [](auto const& ep) {
                 return ep.second >= 1e-10;
@@ -145,37 +159,11 @@ extern "C" {
         size_t degen = fiedler_it - evals.begin();
 
         double sign = (evecs(graph_dim - 1, fiedler_it->first) < 0) ? 1. : -1.;
-        for (size_t i = 0; i < graph_dim; ++i) {
-            fiedler[i] = sign * evecs(i, fiedler_it->first);
+        for (size_t i = 0; i < Np; ++i) {
+            fiedler[i] = indices[i] >= 0 ? (sign * evecs(indices[i], fiedler_it->first)) : 0;
         }
 
         return degen;
-
-        // for (size_t i = 0; i < graph_dim; ++i) {
-        //     if (evals[i].second < 1e-10) {
-        //         ++degen;
-        //     }
-        //     label_t l;
-        //     phase_point p;
-        //     for (auto const& label_point_pair : phase_points) {
-        //         std::tie(l, p) = label_point_pair;
-        //         auto idx_it = index_map.find(l);
-        //         if (idx_it == index_map.end()) {
-        //             if (use_masked_value) {
-        //                 std::copy(p.begin(), p.end(),
-        //                     std::ostream_iterator<double>{os, "\t"});
-        //                 os << masked_value << '\n';
-        //             } else {
-        //                 continue;
-        //             }
-        //         } else {
-        //             std::copy(p.begin(), p.end(),
-        //                 std::ostream_iterator<double>{os, "\t"});
-        //             os << evecs(idx_it->second, evals[i].first) << '\n';
-        //         }
-        //     }
-        //     os << "\n\n";
-        // }
     }
 
     void compute_fiedler_histo(double *fiedler, double *histo, double *min_max_step) {
@@ -184,8 +172,8 @@ extern "C" {
         double & step = min_max_step[2];
         double & oom = min_max_step[3];
 
-        double true_min = *std::min_element(fiedler, fiedler + graph_dim);
-        double true_max = *std::max_element(fiedler, fiedler + graph_dim);
+        double true_min = *std::min_element(fiedler, fiedler + Np);
+        double true_max = *std::max_element(fiedler, fiedler + Np);
 
         step = (true_max - true_min) / 6;
         oom = 1;
@@ -217,14 +205,17 @@ extern "C" {
         const size_t N_bin = 70;
         for (size_t i = 0; i < N_bin; ++i)
             histo[i] = 0;
-        for (size_t i = 0; i < graph_dim; ++i)
-            histo[static_cast<size_t>((fiedler[i] - min) / range * N_bin)]++;
+        for (size_t i = 0; i < Np; ++i)
+            if (fiedler[i] != 0)
+                histo[static_cast<size_t>((fiedler[i] - min) / range * N_bin)]++;
     }
 
     void map_colors(double *fiedler, double min, double max, double *rgb) {
         auto pal = spectral_mod.rescale(min, max);
-        for (size_t i = 0; i < graph_dim; ++i) {
+        for (size_t i = 0; i < Np; ++i) {
             auto c = pal(fiedler[i]);
+            if (fiedler[i] == 0)
+                c = rgb_t{0xaa, 0xaa, 0xaa};
             std::stringstream ss;
             ss << c;
             ss >> rgb[3 * i];

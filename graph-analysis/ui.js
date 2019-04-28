@@ -32,7 +32,7 @@ function redraw_fiedler(fiedler_bitmap) {
     gnuplot.TR(204.5 * 10, 243 * 10, 0, 8, "Center", "-");
 }
 
-function redraw_graph(weight_data) {
+function redraw_graph(weight_data, mask_data) {
     var canvas = document.getElementById('gnuplot_graph_canvas');
     var ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -42,11 +42,13 @@ function redraw_graph(weight_data) {
 
     ctx.fillStyle = 'rgb(0%, 42%, 80%)';
 
-    points.forEach(function(p) {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 1, 0, 2 * Math.PI);
-        ctx.fill();
-    });
+    for (var i = 0; i < points.length; ++i) {
+        if (!mask_data || mask_data[i]) {
+            ctx.beginPath();
+            ctx.arc(points[i].x, points[i].y, 1, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+    }
 
     var sum = weight_data.reduce((a, b) => a + b, 0);
     if (sum > 2e4) {
@@ -58,6 +60,8 @@ function redraw_graph(weight_data) {
     var k = 0;
     for (var i = 0; i < points.length; ++i) {
         for(var j = i + 1; j < points.length; ++j, ++k) {
+            if (mask_data && (!mask_data[i] || !mask_data[j]))
+                continue;
             var w = weight_data[k];
             if (w > 1e-2) {
                 ctx.strokeStyle = `rgba(0%, 42%, 80%, ${100*w}%)`;
@@ -197,6 +201,7 @@ window.onload = function () {
     var misc_ready = false;
     var fiedler_ready = false;
 
+    var mask_check = document.getElementById('mask-check');
     var rank_select = document.getElementById('rank-select');
 
     function update() {
@@ -213,12 +218,13 @@ window.onload = function () {
             });
         }
     }
+    mask_check.onchange = update;
     rank_select.onchange = update;
 
     misc_worker.onmessage = function(event) {
         var msg = event.data;
         if (msg.action == 'redraw_graph') {
-            redraw_graph(msg.weight_data);
+            redraw_graph(msg.weight_data, mask_check.checked ? msg.mask_data : null);
         } else if (msg.action == 'redraw_histo') {
             redraw_histo(msg.bias_histo_data, msg.weight_histo_data, msg.curve_data);
             misc_pending--;
@@ -230,6 +236,7 @@ window.onload = function () {
             misc_worker.postMessage({
                 action: 'current_rhoc',
                 calc_fiedler: false,
+                use_mask: mask_check.checked,
                 rank: parseInt(rank_select.options[rank_select.selectedIndex].value),
                 rhoc: rhoc
             });
@@ -250,6 +257,7 @@ window.onload = function () {
             fiedler_worker.postMessage({
                 action: 'current_rhoc',
                 calc_fiedler: true,
+                use_mask: mask_check.checked,
                 rank: parseInt(rank_select.options[rank_select.selectedIndex].value),
                 rhoc: rhoc
             });

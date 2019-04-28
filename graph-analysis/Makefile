@@ -8,7 +8,7 @@ EMRUN = source ~/opensource/emsdk/emsdk_env.sh && emrun
 EMCC = source ~/opensource/emsdk/emsdk_env.sh && emcc
 EM_OPT = -s DISABLE_EXCEPTION_CATCHING=0
 EM_EXEX = -s 'EXTRA_EXPORTED_RUNTIME_METHODS=["ccall", "cwrap", "getValue", "setValue"]'
-EM_EX = -s EXPORTED_FUNCTIONS='["_main", "_get_biases", "_get_weights", "_compute_bias_histo", "_compute_weight_histo", "_get_fiedler", "_compute_fiedler_histo", "_map_colors"]'
+EM_EX = -s EXPORTED_FUNCTIONS='["_main", "_get_mask", "_get_biases", "_get_weights", "_compute_bias_histo", "_compute_weight_histo", "_get_fiedler", "_compute_fiedler_histo", "_map_colors"]'
 
 INCLUDES = -I/usr/include/eigen3 -I../colormap
 CXXFLAGS = -std=c++1z -O3
@@ -31,11 +31,19 @@ clean:
 _data/rho_%.c: _data/rho_%.txt
 	echo '{' > $@
 	sed -r 's/^([^\t]+)\t.*$$/\1,/g' $< >> $@
-	echo '},' >> $@
+	echo -n '}' >> $@
 
-biases.cpp: _data/rho_rank1.c _data/rho_rank2.c _data/rho_rank3.c _data/rho_rank4.c
-	echo 'double biases[][121278] = {' > $@
-	cat $^ >> $@
+_data/mask.c: _data/mask.txt
+	echo '{' > $@
+	sed -r 's/^.*\t([^\t]+)$$/\1,/g' $< >> $@
+	echo -n '}' >> $@
+
+biases.cpp: _data/mask.c _data/rho_rank1.c _data/rho_rank2.c _data/rho_rank3.c _data/rho_rank4.c
+	echo -n 'int mask[493] = ' > $@
+	cat $< >> $@
+	echo ';' >> $@
+	echo 'double biases[][121278] = {' >> $@
+	$(foreach file,$(filter-out $<,$^), cat $(file) >> $@; echo ',' >> $@;)
 	echo '};' >> $@
 
 graph_analysis.js: graph_analysis.cpp biases.cpp
