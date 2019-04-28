@@ -82,7 +82,7 @@ function redraw_histo(bias_histo_data, weight_histo_data, curve_data) {
 
     gnuplot_histo_canvas();
 
-    var N_bin = 50;
+    var N_bin = 49;
     var binwidth = gnuplot.plot_width / N_bin;
     var ybot = 115.;
     var phgt = 111.9;

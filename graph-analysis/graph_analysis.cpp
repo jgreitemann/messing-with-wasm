@@ -79,8 +79,8 @@ extern "C" {
     }
 
     void compute_bias_histo(double *biases, int *histo, bool use_mask) {
-        size_t N_bin = 50;
-        double log_min = -2, log_max = 3;
+        size_t N_bin = 49;
+        double log_min = -2, log_max = std::log10(2000.);
         for (size_t i = 0; i < N_bin; ++i)
             histo[i] = 0;
         for (size_t l = 0, i = 0; l < Np - 1; ++l) {

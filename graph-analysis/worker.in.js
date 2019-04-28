@@ -28,7 +28,7 @@ var Module = {
         min_max_step_ptr = Module._malloc(8 * 4);
         fiedler_histo_ptr = Module._malloc(4 * 70);
         curve_ptr = Module._malloc(8 * 2000);
-        bias_histo_ptr = Module._malloc(4 * 50);
+        bias_histo_ptr = Module._malloc(4 * 49);
         weight_histo_ptr = Module._malloc(4 * 50);
 
         self.onmessage = function(event) {
@@ -47,7 +47,7 @@ var Module = {
 
                     compute_bias_histo(bias_ptr, bias_histo_ptr, msg.use_mask);
                     bias_histo_data = [];
-                    for (var i = 0; i < 50; ++i)
+                    for (var i = 0; i < 49; ++i)
                         bias_histo_data.push(Module.getValue(bias_histo_ptr + 4 * i, 'i32'));
                     compute_weight_histo(weight_ptr, weight_histo_ptr, msg.use_mask);
                     weight_histo_data = [];
