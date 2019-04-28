@@ -203,6 +203,7 @@ window.onload = function () {
 
     var mask_check = document.getElementById('mask-check');
     var rank_select = document.getElementById('rank-select');
+    var func_select = document.getElementById('func-select');
 
     function update() {
         if (misc_pending < 2) {
@@ -238,6 +239,7 @@ window.onload = function () {
                 calc_fiedler: false,
                 use_mask: mask_check.checked,
                 rank: parseInt(rank_select.options[rank_select.selectedIndex].value),
+                func: func_select.selectedIndex,
                 rhoc: rhoc
             });
         }
@@ -259,6 +261,7 @@ window.onload = function () {
                 calc_fiedler: true,
                 use_mask: mask_check.checked,
                 rank: parseInt(rank_select.options[rank_select.selectedIndex].value),
+                func: func_select.selectedIndex,
                 rhoc: rhoc
             });
         }
@@ -267,6 +270,26 @@ window.onload = function () {
 
     var rhoc_text = document.getElementById('rhoc-text');
     var rhoc_slider = document.getElementById('rhoc-slider');
+    var func_math = {
+        'box': document.getElementById('box-math'),
+        'lorentzian': document.getElementById('lorentzian-math'),
+        'gaussian': document.getElementById('gaussian-math')
+    };
+
+    function update_func() {
+        for (var key in func_math) {
+            if (key == func_select.options[func_select.selectedIndex].value) {
+                func_math[key].style = 'display: inline;';
+            } else {
+                func_math[key].style = 'display: none;';
+            }
+        }
+    }
+    update_func();
+    func_select.onchange = function(event) {
+        update_func();
+        update();
+    };
 
     function update_slider() {
         rhoc_slider.value = Math.log10(rhoc);

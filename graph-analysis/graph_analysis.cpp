@@ -44,15 +44,15 @@ extern "C" {
 
     void get_weights(double *biases, int func, double rhoc, double *weights) {
         auto weight = [&]() -> std::function<double(double)> {
-            if (func == 2) {
+            if (func == 0) {
                 return [rhoc](double rho) {
                     return std::abs(std::abs(rho) - 1.) > rhoc;
                 };
-            } else if (func == 1) {
+            } else if (func == 2) {
                 return [rhoc](double rho) {
                     return 1. - exp(-0.5 * pow((std::abs(rho) - 1.) / rhoc, 2.));
                 };
-            } else if (func == 0) {
+            } else if (func == 1) {
                 return [&, gamma_sq = rhoc * rhoc](double rho) {
                     return 1. - gamma_sq / (pow(std::abs(rho) - 1., 2.) + gamma_sq);
                 };

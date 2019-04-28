@@ -39,7 +39,7 @@ var Module = {
                 });
             } else if (msg.action == 'current_rhoc') {
                 var bias_ptr = get_biases(msg.rank);
-                get_weights(bias_ptr, 0, msg.rhoc, weight_ptr);
+                get_weights(bias_ptr, msg.func, msg.rhoc, weight_ptr);
                 if (!msg.calc_fiedler) {
                     weight_data = [];
                     for (var i = 0; i < 121278; ++i)
@@ -53,7 +53,7 @@ var Module = {
                     weight_histo_data = [];
                     for (var i = 0; i < 50; ++i)
                         weight_histo_data.push(Module.getValue(weight_histo_ptr + 4 * i, 'i32'));
-                    get_weights(0, 0, msg.rhoc, curve_ptr);
+                    get_weights(0, msg.func, msg.rhoc, curve_ptr);
                     curve_data = [];
                     for (var i = 0; i < 2000; ++i)
                         curve_data.push(Module.getValue(curve_ptr + 8 * i, 'double'));

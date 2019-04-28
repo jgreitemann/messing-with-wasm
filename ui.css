@@ -44,7 +44,7 @@
 
 .ui-cell {
     display: table-cell;
-    padding: 1em;
+    padding: 0.5em 1em;
     font-family: sans;
 }
 

@@ -26,7 +26,7 @@
             <div class="ui neutral">
                 <h1>Input data selection</h1>
                 <div>
-                    <span class="ui-cell centered">
+                    <span class="ui-cell">
                         <label for="rank-select">
                             Tensorial kernel:
                         </label>
@@ -37,7 +37,7 @@
                             <option value="4">Rank 4</option>
                         </select>
                     </span>
-                    <label class="ui-cell centered">
+                    <label class="ui-cell">
                         <input type="checkbox" id="mask-check" checked />
                         Mask AF phase points
                     </label>
@@ -46,15 +46,132 @@
             <div class="ui neutral">
                 <h1>Graph weighting</h1>
                 <div>
-                    <label class="ui-cell centered">
-                        Weighting function:
-                        <select id="func-select">
-                            <option value="box">Heaviside</option>
-                            <option value="lorentzian">Lorentzian</option>
-                            <option value="gaussian">Gaussian</option>
-                        </select>
-                    </label>
-                    <span class="ui-cell centered">
+                    <span class="ui-cell">
+                        <label>
+                            Weighting function:
+                            <select id="func-select">
+                                <option value="box">Heaviside</option>
+                                <option value="lorentzian">Lorentzian</option>
+                                <option value="gaussian">Gaussian</option>
+                            </select>
+                        </label>
+                        <div id="box-math" class="padded" style="display: none;">
+                            <math>
+                                <mrow>
+                                    <mi>w</mi>
+                                    <mrow>
+                                        <mo form="prefix">(</mo>
+                                        <mi>&#x003C1;</mi>
+                                        <mo form="postfix">)</mo>
+                                    </mrow>
+                                    <mo>=</mo>
+                                    <mi mathvariant="normal">&#x00398;</mi>
+                                    <mrow>
+                                        <mo form="prefix">(</mo>
+                                        <mo>|</mo>
+                                        <mi>&#x003C1;</mi>
+                                        <mo>|</mo>
+                                        <mo>-</mo>
+                                        <msub>
+                                            <mi>&#x003C1;</mi>
+                                            <mi>c</mi>
+                                        </msub>
+                                        <mo form="postfix">)</mo>
+                                    </mrow>
+                                </mrow>
+                            </math>
+                        </div>
+                        <div id="lorentzian-math" class="padded">
+                            <math>
+                                <mrow>
+                                    <mi>w</mi>
+                                    <mrow>
+                                        <mo form="prefix">(</mo>
+                                        <mi>&#x003C1;</mi>
+                                        <mo form="postfix">)</mo>
+                                    </mrow>
+                                    <mo>=</mo>
+                                    <mn>1</mn>
+                                    <mo>-</mo>
+                                    <mfrac>
+                                        <mrow>
+                                            <msubsup>
+                                                <mi>&#x003C1;</mi>
+                                                <mi>c</mi>
+                                                <mn>2</mn>
+                                            </msubsup>
+                                        </mrow>
+                                        <mrow>
+                                            <msup>
+                                                <mrow>
+                                                    <mo form="prefix">(</mo>
+                                                    <mo>|</mo>
+                                                    <mi>&#x003C1;</mi>
+                                                    <mo>|</mo>
+                                                    <mo>-</mo>
+                                                    <mn>1</mn>
+                                                    <mo form="postfix">)</mo>
+                                                </mrow>
+                                                <mn>2</mn>
+                                            </msup>
+                                            <mo>+</mo>
+                                            <msubsup>
+                                                <mi>&#x003C1;</mi>
+                                                <mi>c</mi>
+                                                <mn>2</mn>
+                                            </msubsup>
+                                        </mrow>
+                                    </mfrac>
+                                </mrow>
+                            </math>
+                        </div>
+                        <div id="gaussian-math" class="padded" style="display: none;">
+                            <math>
+                                <mrow>
+                                    <mi>w</mi>
+                                    <mrow>
+                                        <mo form="prefix">(</mo>
+                                        <mi>&#x003C1;</mi>
+                                        <mo form="postfix">)</mo>
+                                    </mrow>
+                                    <mo>=</mo>
+                                    <mn>1</mn>
+                                    <mo>-</mo>
+                                    <mi>exp</mi>
+                                    <mrow>
+                                        <mo fence="true" form="prefix">(</mo>
+                                        <mo>-</mo>
+                                        <mfrac>
+                                            <mrow>
+                                                <msup>
+                                                    <mrow>
+                                                        <mo form="prefix">(</mo>
+                                                        <mo>|</mo>
+                                                        <mi>&#x003C1;</mi>
+                                                        <mo>|</mo>
+                                                        <mo>-</mo>
+                                                        <mn>1</mn>
+                                                        <mo form="postfix">)</mo>
+                                                    </mrow>
+                                                    <mn>2</mn>
+                                                </msup>
+                                            </mrow>
+                                            <mrow>
+                                                <mn>2</mn>
+                                                <msubsup>
+                                                    <mi>&#x003C1;</mi>
+                                                    <mi>c</mi>
+                                                    <mn>2</mn>
+                                                </msubsup>
+                                            </mrow>
+                                        </mfrac>
+                                        <mo fence="true" form="postfix">)</mo>
+                                    </mrow>
+                                </mrow>
+                            </math>
+                        </div>
+                    </span>
+                    <span class="ui-cell">
                         <label>
                             <math>
                                 <mrow>
