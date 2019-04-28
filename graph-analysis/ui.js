@@ -323,6 +323,8 @@ window.onload = function () {
 
     rhoc_slider.oninput = function(event) {
         var rhoc = Math.pow(10, rhoc_slider.value);
+        var oom = Math.pow(10, Math.ceil(rhoc_slider.value));
+        rhoc = Math.round(rhoc / oom * 100) / 100 * oom;
         rhoc_text.value = rhoc;
         update();
     };
