@@ -48,13 +48,6 @@ function redraw_graph(weight_data, mask_data) {
         }
     }
 
-    var sum = weight_data.reduce((a, b) => a + b, 0);
-    if (sum > 2e4) {
-        ctx.fillRect(boundingRect.origin.x, boundingRect.origin.y,
-            boundingRect.size.width, boundingRect.size.height);
-        return;
-    }
-
     var k = 0;
     for (var i = 0; i < points.length; ++i) {
         for(var j = i + 1; j < points.length; ++j, ++k) {
