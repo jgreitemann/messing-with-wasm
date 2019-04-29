@@ -30,39 +30,27 @@ function redraw_fiedler(fiedler_bitmap) {
     gnuplot.TR(204.5 * 10, 243 * 10, 0, 8, "Center", "-");
 }
 
-function redraw_graph(weight_data, mask_data) {
+function redraw_graph(imageData, mask_data) {
     var canvas = document.getElementById('gnuplot_graph_canvas');
     var ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    gnuplot_graph_canvas();
-    gnuplot.TR(204.5 * 10, 243 * 10, 0, 8, "Center", "-");
+    createImageBitmap(imageData).then(function(bitmap) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(bitmap, boundingRect.origin.x, boundingRect.origin.y);
 
-    ctx.fillStyle = 'rgb(0%, 42%, 80%)';
+        gnuplot_graph_canvas();
+        gnuplot.TR(204.5 * 10, 243 * 10, 0, 8, "Center", "-");
 
-    for (var i = 0; i < points.length; ++i) {
-        if (!mask_data || mask_data[i]) {
-            ctx.beginPath();
-            ctx.arc(points[i].x, points[i].y, 1, 0, 2 * Math.PI);
-            ctx.fill();
-        }
-    }
+        ctx.fillStyle = 'rgb(0%, 42%, 80%)';
 
-    var k = 0;
-    for (var i = 0; i < points.length; ++i) {
-        for(var j = i + 1; j < points.length; ++j, ++k) {
-            if (mask_data && (!mask_data[i] || !mask_data[j]))
-                continue;
-            var w = weight_data[k];
-            if (w > 1e-2) {
-                ctx.strokeStyle = `rgba(0%, 42%, 80%, ${100*w}%)`;
+        for (var i = 0; i < points.length; ++i) {
+            if (!mask_data || mask_data[i]) {
                 ctx.beginPath();
-                ctx.moveTo(points[i].x, points[i].y);
-                ctx.lineTo(points[j].x, points[j].y);
-                ctx.stroke();
+                ctx.arc(points[i].x, points[i].y, 1, 0, 2 * Math.PI);
+                ctx.fill();
             }
         }
-    }
+    });
 }
 
 function redraw_histo(bias_histo_data, weight_histo_data, curve_data) {
@@ -260,9 +248,14 @@ window.onload = function () {
     graph_worker.onmessage = function(event) {
         var msg = event.data;
         if (msg.action == 'redraw_graph') {
-            redraw_graph(msg.weight_data, mask_check.checked ? msg.mask_data : null);
+            redraw_graph(msg.imageData, mask_check.checked ? msg.mask_data : null);
             graph_pending--;
         } else if (msg.action == 'init') {
+            graph_worker.postMessage({
+                action: 'receive_dimensions',
+                width: boundingRect.size.width,
+                height: boundingRect.size.height
+            });
             graph_ready = true;
             if (misc_ready && graph_ready && fiedler_ready)
                 update();

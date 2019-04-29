@@ -8,7 +8,7 @@ EMRUN = source ~/opensource/emsdk/emsdk_env.sh && emrun
 EMCC = source ~/opensource/emsdk/emsdk_env.sh && emcc
 EM_OPT = -s DISABLE_EXCEPTION_CATCHING=0
 EM_EXEX = -s 'EXTRA_EXPORTED_RUNTIME_METHODS=["ccall", "cwrap", "getValue", "setValue"]'
-EM_EX = -s EXPORTED_FUNCTIONS='["_main", "_get_mask", "_get_biases", "_get_weights", "_compute_bias_histo", "_compute_weight_histo", "_get_fiedler", "_compute_fiedler_histo", "_map_colors"]'
+EM_EX = -s EXPORTED_FUNCTIONS='["_main", "_get_mask", "_get_biases", "_get_weights", "_compute_bias_histo", "_compute_weight_histo", "_get_fiedler", "_compute_fiedler_histo", "_map_colors", "_render_graph"]'
 
 INCLUDES = -I/usr/include/eigen3 -I../colormap
 CXXFLAGS = -std=c++1z -O3
