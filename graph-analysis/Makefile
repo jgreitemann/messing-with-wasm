@@ -14,7 +14,7 @@ INCLUDES = -I/usr/include/eigen3 -I../colormap
 CXXFLAGS = -std=c++1z -O3
 
 HTML = index.html
-JS = graph_analysis.js worker.js
+JS = graph_analysis.js misc_worker.js fiedler_worker.js
 GPJS = gnuplot_histo.js gnuplot_graph.js gnuplot_fiedler.js gnuplot_fiedler_histo.js
 WASM = $(JS:.js=.wasm)
 
@@ -49,7 +49,7 @@ biases.cpp: _data/mask.c _data/rho_rank1.c _data/rho_rank2.c _data/rho_rank3.c _
 graph_analysis.js: graph_analysis.cpp biases.cpp
 	$(EMCC) $(CXXFLAGS) $(INCLUDES) $^ -s WASM=1 $(EM_OPT) $(EM_EX) $(EM_EXEX) -o $@
 
-worker.js: worker.in.js graph_analysis.js
+%_worker.js: %_worker.in.js graph_analysis.js
 	$(CAT) $^ > $@
 
 _gp/%.html: _gp/%.gp _data/*

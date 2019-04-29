@@ -192,8 +192,8 @@ function redraw_fiedler_histo(min, max, step, oom, histo) {
 }
 
 window.onload = function () {
-    var misc_worker = new Worker('worker.js');
-    var fiedler_worker = new Worker('worker.js');
+    var misc_worker = new Worker('misc_worker.js');
+    var fiedler_worker = new Worker('fiedler_worker.js');
     var misc_pending = 0;
     var fiedler_pending = 0;
     var misc_ready = false;
@@ -244,7 +244,6 @@ window.onload = function () {
             var radius = parseFloat(radius_text.value);
             misc_worker.postMessage({
                 action: 'current_rhoc',
-                calc_fiedler: false,
                 use_mask: mask_check.checked,
                 rank: rank,
                 func: func_select.selectedIndex,
@@ -270,7 +269,6 @@ window.onload = function () {
             var radius = parseFloat(radius_text.value);
             fiedler_worker.postMessage({
                 action: 'current_rhoc',
-                calc_fiedler: true,
                 use_mask: mask_check.checked,
                 rank: rank,
                 func: func_select.selectedIndex,

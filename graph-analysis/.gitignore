@@ -4,4 +4,4 @@ gnuplot_*.js
 !gnuplot_common.js
 graph_analysis.js
 graph_analysis.wasm
-worker.js
+*_worker.js
