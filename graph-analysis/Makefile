@@ -14,7 +14,7 @@ INCLUDES = -I/usr/include/eigen3 -I../colormap
 CXXFLAGS = -std=c++1z -O3
 
 HTML = index.html
-JS = graph_analysis.js misc_worker.js fiedler_worker.js
+JS = graph_analysis.js misc_worker.js graph_worker.js fiedler_worker.js
 GPJS = gnuplot_histo.js gnuplot_graph.js gnuplot_fiedler.js gnuplot_fiedler_histo.js
 WASM = $(JS:.js=.wasm)
 

@@ -193,10 +193,13 @@ function redraw_fiedler_histo(min, max, step, oom, histo) {
 
 window.onload = function () {
     var misc_worker = new Worker('misc_worker.js');
+    var graph_worker = new Worker('graph_worker.js');
     var fiedler_worker = new Worker('fiedler_worker.js');
     var misc_pending = 0;
+    var graph_pending = 0;
     var fiedler_pending = 0;
     var misc_ready = false;
+    var graph_ready = false;
     var fiedler_ready = false;
 
     var mask_check = document.getElementById('mask-check');
@@ -219,6 +222,12 @@ window.onload = function () {
                 action: 'queue_update'
             });
         }
+        if (graph_pending < 2) {
+            graph_pending++;
+            graph_worker.postMessage({
+                action: 'queue_update'
+            });
+        }
         if (fiedler_pending < 2) {
             fiedler_pending++;
             fiedler_worker.postMessage({
@@ -227,29 +236,45 @@ window.onload = function () {
         }
     }
 
+    function send_rhoc(worker) {
+        var rank = parseInt(document.querySelector('input[name="rank-select"]:checked').value);
+        var rhoc = parseFloat(rhoc_text.value);
+        var radius = parseFloat(radius_text.value);
+        worker.postMessage({
+            action: 'current_rhoc',
+            use_mask: mask_check.checked,
+            rank: rank,
+            func: func_select.selectedIndex,
+            rhoc: rhoc,
+            radius: radius
+        });
+    }
+
     misc_worker.onmessage = function(event) {
         var msg = event.data;
-        if (msg.action == 'redraw_graph') {
-            redraw_graph(msg.weight_data, mask_check.checked ? msg.mask_data : null);
-        } else if (msg.action == 'redraw_histo') {
+        if (msg.action == 'redraw_histo') {
             redraw_histo(msg.bias_histo_data, msg.weight_histo_data, msg.curve_data);
             misc_pending--;
         } else if (msg.action == 'init') {
             misc_ready = true;
-            if (misc_ready && fiedler_ready)
+            if (misc_ready && graph_ready && fiedler_ready)
                 update();
         } else if (msg.action == 'get_rhoc') {
-            var rank = parseInt(document.querySelector('input[name="rank-select"]:checked').value);
-            var rhoc = parseFloat(rhoc_text.value);
-            var radius = parseFloat(radius_text.value);
-            misc_worker.postMessage({
-                action: 'current_rhoc',
-                use_mask: mask_check.checked,
-                rank: rank,
-                func: func_select.selectedIndex,
-                rhoc: rhoc,
-                radius: radius
-            });
+            send_rhoc(misc_worker);
+        }
+    };
+
+    graph_worker.onmessage = function(event) {
+        var msg = event.data;
+        if (msg.action == 'redraw_graph') {
+            redraw_graph(msg.weight_data, mask_check.checked ? msg.mask_data : null);
+            graph_pending--;
+        } else if (msg.action == 'init') {
+            graph_ready = true;
+            if (misc_ready && graph_ready && fiedler_ready)
+                update();
+        } else if (msg.action == 'get_rhoc') {
+            send_rhoc(graph_worker);
         }
     };
 
@@ -261,20 +286,10 @@ window.onload = function () {
             fiedler_pending--;
         } else if (msg.action == 'init') {
             fiedler_ready = true;
-            if (misc_ready && fiedler_ready)
+            if (misc_ready && graph_ready && fiedler_ready)
                 update();
         } else if (msg.action == 'get_rhoc') {
-            var rank = parseInt(document.querySelector('input[name="rank-select"]:checked').value);
-            var rhoc = parseFloat(rhoc_text.value);
-            var radius = parseFloat(radius_text.value);
-            fiedler_worker.postMessage({
-                action: 'current_rhoc',
-                use_mask: mask_check.checked,
-                rank: rank,
-                func: func_select.selectedIndex,
-                rhoc: rhoc,
-                radius: radius
-            });
+            send_rhoc(fiedler_worker);
         }
     };
 
