@@ -82,6 +82,75 @@ namespace bresenham {
     }
 }
 
+namespace xiaolin_wu {
+    template <typename Callable>
+    void draw_line(double a_x, double a_y, double b_x, double b_y,
+        Callable && set_pixel)
+    {
+        constexpr auto fpart = [](double x) { return x - std::floor(x); };
+        constexpr auto rfpart = [fpart](double x) { return 1 - fpart(x); };
+
+        const bool steep = std::abs(b_y - a_y) > std::abs(b_x - a_x);
+
+        if (steep) {
+            std::swap(a_x, a_y);
+            std::swap(b_x, b_y);
+        }
+        if (a_x > b_x) {
+            std::swap(a_x, b_x);
+            std::swap(a_y, b_y);
+        }
+
+        double dx = b_x - a_x;
+        double dy = b_y - a_y;
+        double gradient = dy / dx;
+        if (dx == 0.0)
+            gradient = 1.0;
+
+        // handle first endpoint
+        double xend = std::round(a_x);
+        double yend = a_y + gradient * (xend - a_x);
+        double xgap = rfpart(a_x + 0.5);
+        int xpxl1 = static_cast<int>(xend);
+        int ypxl1 = static_cast<int>(yend);
+        if (steep) {
+            set_pixel(ypxl1, xpxl1, rfpart(yend) * xgap);
+            set_pixel(ypxl1 + 1, xpxl1, fpart(yend) * xgap);
+        } else {
+            set_pixel(xpxl1, ypxl1, rfpart(yend) * xgap);
+            set_pixel(xpxl1, ypxl1 + 1, fpart(yend) * xgap);
+        }
+        double intery = yend + gradient;
+
+        // handle second endpoint
+        xend = std::round(b_x);
+        yend = b_y + gradient * (xend - b_x);
+        xgap = fpart(b_x + 0.5);
+        int xpxl2 = static_cast<int>(xend);
+        int ypxl2 = static_cast<int>(yend);
+        if (steep) {
+            set_pixel(ypxl2, xpxl2, rfpart(yend) * xgap);
+            set_pixel(ypxl2 + 1, xpxl2, fpart(yend) * xgap);
+        } else {
+            set_pixel(xpxl2, ypxl2, rfpart(yend) * xgap);
+            set_pixel(xpxl2, ypxl2 + 1, fpart(yend) * xgap);
+        }
+
+        // main loop
+        if (steep) {
+            for (int x = xpxl1 + 1; x < xpxl2; ++x, intery += gradient) {
+                set_pixel(static_cast<int>(intery), x, rfpart(intery));
+                set_pixel(static_cast<int>(intery) + 1, x, fpart(intery));
+            }
+        } else {
+            for (int x = xpxl1 + 1; x < xpxl2; ++x, intery += gradient) {
+                set_pixel(x, static_cast<int>(intery), rfpart(intery));
+                set_pixel(x, static_cast<int>(intery) + 1, fpart(intery));
+            }
+        }
+    }
+}
+
 extern "C" {
 
     int main() {
@@ -143,12 +212,12 @@ extern "C" {
             for (size_t m = l + 1; m < Np; ++m, ++i) {
                 if (use_mask && (!mask[l] || !mask[m]))
                     continue;
-                if (weights[i] > 1e-3) {
+                if (weights[i] > 1e-2) {
                     double a_x = 1. / (w - 1) * (l % w) * bw;
                     double b_x = 1. / (w - 1) * (m % w) * bw;
                     double a_y = 1. / (h - 1) * (h - 1 - l / w) * bh;
                     double b_y = 1. / (h - 1) * (h - 1 - m / w) * bh;
-                    bresenham::draw_line(a_x, a_y, b_x, b_y,
+                    xiaolin_wu::draw_line(a_x, a_y, b_x, b_y,
                         [&, w=weights[i]](size_t i, size_t j, double val) {
                             if (i < bw && j < bh)
                                 pix[j * bw + i] += w * val;
