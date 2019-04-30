@@ -30,46 +30,27 @@ function redraw_fiedler(fiedler_bitmap) {
     gnuplot.TR(204.5 * 10, 243 * 10, 0, 8, "Center", "-");
 }
 
-function redraw_graph(weight_data, mask_data) {
+function redraw_graph(imageData, mask_data) {
     var canvas = document.getElementById('gnuplot_graph_canvas');
     var ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    gnuplot_graph_canvas();
-    gnuplot.TR(204.5 * 10, 243 * 10, 0, 8, "Center", "-");
+    createImageBitmap(imageData).then(function(bitmap) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(bitmap, boundingRect.origin.x, boundingRect.origin.y);
 
-    ctx.fillStyle = 'rgb(0%, 42%, 80%)';
+        gnuplot_graph_canvas();
+        gnuplot.TR(204.5 * 10, 243 * 10, 0, 8, "Center", "-");
 
-    for (var i = 0; i < points.length; ++i) {
-        if (!mask_data || mask_data[i]) {
-            ctx.beginPath();
-            ctx.arc(points[i].x, points[i].y, 1, 0, 2 * Math.PI);
-            ctx.fill();
-        }
-    }
+        ctx.fillStyle = 'rgb(0%, 42%, 80%)';
 
-    var sum = weight_data.reduce((a, b) => a + b, 0);
-    if (sum > 2e4) {
-        ctx.fillRect(boundingRect.origin.x, boundingRect.origin.y,
-            boundingRect.size.width, boundingRect.size.height);
-        return;
-    }
-
-    var k = 0;
-    for (var i = 0; i < points.length; ++i) {
-        for(var j = i + 1; j < points.length; ++j, ++k) {
-            if (mask_data && (!mask_data[i] || !mask_data[j]))
-                continue;
-            var w = weight_data[k];
-            if (w > 1e-2) {
-                ctx.strokeStyle = `rgba(0%, 42%, 80%, ${100*w}%)`;
+        for (var i = 0; i < points.length; ++i) {
+            if (!mask_data || mask_data[i]) {
                 ctx.beginPath();
-                ctx.moveTo(points[i].x, points[i].y);
-                ctx.lineTo(points[j].x, points[j].y);
-                ctx.stroke();
+                ctx.arc(points[i].x, points[i].y, 1, 0, 2 * Math.PI);
+                ctx.fill();
             }
         }
-    }
+    });
 }
 
 function redraw_histo(bias_histo_data, weight_histo_data, curve_data) {
@@ -192,11 +173,14 @@ function redraw_fiedler_histo(min, max, step, oom, histo) {
 }
 
 window.onload = function () {
-    var misc_worker = new Worker('worker.js');
-    var fiedler_worker = new Worker('worker.js');
+    var misc_worker = new Worker('misc_worker.js');
+    var graph_worker = new Worker('graph_worker.js');
+    var fiedler_worker = new Worker('fiedler_worker.js');
     var misc_pending = 0;
+    var graph_pending = 0;
     var fiedler_pending = 0;
     var misc_ready = false;
+    var graph_ready = false;
     var fiedler_ready = false;
 
     var mask_check = document.getElementById('mask-check');
@@ -219,6 +203,12 @@ window.onload = function () {
                 action: 'queue_update'
             });
         }
+        if (graph_pending < 2) {
+            graph_pending++;
+            graph_worker.postMessage({
+                action: 'queue_update'
+            });
+        }
         if (fiedler_pending < 2) {
             fiedler_pending++;
             fiedler_worker.postMessage({
@@ -227,30 +217,50 @@ window.onload = function () {
         }
     }
 
+    function send_rhoc(worker) {
+        var rank = parseInt(document.querySelector('input[name="rank-select"]:checked').value);
+        var rhoc = parseFloat(rhoc_text.value);
+        var radius = parseFloat(radius_text.value);
+        worker.postMessage({
+            action: 'current_rhoc',
+            use_mask: mask_check.checked,
+            rank: rank,
+            func: func_select.selectedIndex,
+            rhoc: rhoc,
+            radius: radius
+        });
+    }
+
     misc_worker.onmessage = function(event) {
         var msg = event.data;
-        if (msg.action == 'redraw_graph') {
-            redraw_graph(msg.weight_data, mask_check.checked ? msg.mask_data : null);
-        } else if (msg.action == 'redraw_histo') {
+        if (msg.action == 'redraw_histo') {
             redraw_histo(msg.bias_histo_data, msg.weight_histo_data, msg.curve_data);
             misc_pending--;
         } else if (msg.action == 'init') {
             misc_ready = true;
-            if (misc_ready && fiedler_ready)
+            if (misc_ready && graph_ready && fiedler_ready)
                 update();
         } else if (msg.action == 'get_rhoc') {
-            var rank = parseInt(document.querySelector('input[name="rank-select"]:checked').value);
-            var rhoc = parseFloat(rhoc_text.value);
-            var radius = parseFloat(radius_text.value);
-            misc_worker.postMessage({
-                action: 'current_rhoc',
-                calc_fiedler: false,
-                use_mask: mask_check.checked,
-                rank: rank,
-                func: func_select.selectedIndex,
-                rhoc: rhoc,
-                radius: radius
+            send_rhoc(misc_worker);
+        }
+    };
+
+    graph_worker.onmessage = function(event) {
+        var msg = event.data;
+        if (msg.action == 'redraw_graph') {
+            redraw_graph(msg.imageData, mask_check.checked ? msg.mask_data : null);
+            graph_pending--;
+        } else if (msg.action == 'init') {
+            graph_worker.postMessage({
+                action: 'receive_dimensions',
+                width: boundingRect.size.width,
+                height: boundingRect.size.height
             });
+            graph_ready = true;
+            if (misc_ready && graph_ready && fiedler_ready)
+                update();
+        } else if (msg.action == 'get_rhoc') {
+            send_rhoc(graph_worker);
         }
     };
 
@@ -262,21 +272,10 @@ window.onload = function () {
             fiedler_pending--;
         } else if (msg.action == 'init') {
             fiedler_ready = true;
-            if (misc_ready && fiedler_ready)
+            if (misc_ready && graph_ready && fiedler_ready)
                 update();
         } else if (msg.action == 'get_rhoc') {
-            var rank = parseInt(document.querySelector('input[name="rank-select"]:checked').value);
-            var rhoc = parseFloat(rhoc_text.value);
-            var radius = parseFloat(radius_text.value);
-            fiedler_worker.postMessage({
-                action: 'current_rhoc',
-                calc_fiedler: true,
-                use_mask: mask_check.checked,
-                rank: rank,
-                func: func_select.selectedIndex,
-                rhoc: rhoc,
-                radius: radius
-            });
+            send_rhoc(fiedler_worker);
         }
     };
 

@@ -8,13 +8,13 @@ EMRUN = source ~/opensource/emsdk/emsdk_env.sh && emrun
 EMCC = source ~/opensource/emsdk/emsdk_env.sh && emcc
 EM_OPT = -s DISABLE_EXCEPTION_CATCHING=0
 EM_EXEX = -s 'EXTRA_EXPORTED_RUNTIME_METHODS=["ccall", "cwrap", "getValue", "setValue"]'
-EM_EX = -s EXPORTED_FUNCTIONS='["_main", "_get_mask", "_get_biases", "_get_weights", "_compute_bias_histo", "_compute_weight_histo", "_get_fiedler", "_compute_fiedler_histo", "_map_colors"]'
+EM_EX = -s EXPORTED_FUNCTIONS='["_main", "_get_mask", "_get_biases", "_get_weights", "_compute_bias_histo", "_compute_weight_histo", "_get_fiedler", "_compute_fiedler_histo", "_map_colors", "_render_graph"]'
 
 INCLUDES = -I/usr/include/eigen3 -I../colormap
 CXXFLAGS = -std=c++1z -O3
 
 HTML = index.html
-JS = graph_analysis.js worker.js
+JS = graph_analysis.js misc_worker.js graph_worker.js fiedler_worker.js
 GPJS = gnuplot_histo.js gnuplot_graph.js gnuplot_fiedler.js gnuplot_fiedler_histo.js
 WASM = $(JS:.js=.wasm)
 
@@ -49,7 +49,7 @@ biases.cpp: _data/mask.c _data/rho_rank1.c _data/rho_rank2.c _data/rho_rank3.c _
 graph_analysis.js: graph_analysis.cpp biases.cpp
 	$(EMCC) $(CXXFLAGS) $(INCLUDES) $^ -s WASM=1 $(EM_OPT) $(EM_EX) $(EM_EXEX) -o $@
 
-worker.js: worker.in.js graph_analysis.js
+%_worker.js: %_worker.in.js graph_analysis.js
 	$(CAT) $^ > $@
 
 _gp/%.html: _gp/%.gp _data/*

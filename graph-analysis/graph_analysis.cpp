@@ -29,6 +29,128 @@ constexpr size_t N = Np * (Np - 1) / 2;
 extern int mask[Np];
 extern double biases[][N];
 
+namespace bresenham {
+    template <typename Callable>
+    void draw_line(double a_x, double a_y, double b_x, double b_y,
+        Callable && set_pixel)
+    {
+        const auto swap_xy = std::abs(b_y - a_y) > std::abs(b_x - a_x);
+        if (swap_xy) {
+            std::swap(a_x, a_y);
+            std::swap(b_x, b_y);
+        }
+
+        struct point {
+            int x;
+            int y;
+        };
+
+        point a{static_cast<int>(a_x), static_cast<int>(a_y)};
+        point b{static_cast<int>(b_x), static_cast<int>(b_y)};
+
+        auto mark = [swap_xy, &set_pixel](point p) {
+            if (swap_xy) {
+                set_pixel(p.y, p.x, 1.);
+            } else {
+                set_pixel(p.x, p.y, 1.);
+            }
+        };
+
+        const point d {
+            b.x - a.x,
+            b.y - a.y
+        };
+        const auto dx_abs = std::abs(d.x);
+        const auto step_y = d.y < 0 ? -1 : 1;
+        const auto step_x = d.x < 0 ? -1 : 1;
+        point pen = a;
+        while (pen.x != b.x) {
+            bool skip = false;
+            auto error = std::abs(2 * d.y*(pen.x - a.x) - 2 * d.x*(pen.y - a.y));
+            while (error > dx_abs) {
+                pen.y += step_y;
+                error -= 2 * dx_abs;
+                mark(pen);
+                skip = true;
+            }
+            if (!skip) {
+                mark(pen);
+            }
+            pen.x += step_x;
+        }
+        mark(b);
+    }
+}
+
+namespace xiaolin_wu {
+    template <typename Callable>
+    void draw_line(double a_x, double a_y, double b_x, double b_y,
+        Callable && set_pixel)
+    {
+        constexpr auto fpart = [](double x) { return x - std::floor(x); };
+        constexpr auto rfpart = [fpart](double x) { return 1 - fpart(x); };
+
+        const bool steep = std::abs(b_y - a_y) > std::abs(b_x - a_x);
+
+        if (steep) {
+            std::swap(a_x, a_y);
+            std::swap(b_x, b_y);
+        }
+        if (a_x > b_x) {
+            std::swap(a_x, b_x);
+            std::swap(a_y, b_y);
+        }
+
+        double dx = b_x - a_x;
+        double dy = b_y - a_y;
+        double gradient = dy / dx;
+        if (dx == 0.0)
+            gradient = 1.0;
+
+        // handle first endpoint
+        double xend = std::round(a_x);
+        double yend = a_y + gradient * (xend - a_x);
+        double xgap = rfpart(a_x + 0.5);
+        int xpxl1 = static_cast<int>(xend);
+        int ypxl1 = static_cast<int>(yend);
+        if (steep) {
+            set_pixel(ypxl1, xpxl1, rfpart(yend) * xgap);
+            set_pixel(ypxl1 + 1, xpxl1, fpart(yend) * xgap);
+        } else {
+            set_pixel(xpxl1, ypxl1, rfpart(yend) * xgap);
+            set_pixel(xpxl1, ypxl1 + 1, fpart(yend) * xgap);
+        }
+        double intery = yend + gradient;
+
+        // handle second endpoint
+        xend = std::round(b_x);
+        yend = b_y + gradient * (xend - b_x);
+        xgap = fpart(b_x + 0.5);
+        int xpxl2 = static_cast<int>(xend);
+        int ypxl2 = static_cast<int>(yend);
+        if (steep) {
+            set_pixel(ypxl2, xpxl2, rfpart(yend) * xgap);
+            set_pixel(ypxl2 + 1, xpxl2, fpart(yend) * xgap);
+        } else {
+            set_pixel(xpxl2, ypxl2, rfpart(yend) * xgap);
+            set_pixel(xpxl2, ypxl2 + 1, fpart(yend) * xgap);
+        }
+
+        // main loop
+        if (steep) {
+            for (int x = xpxl1 + 1; x < xpxl2; ++x, intery += gradient) {
+                set_pixel(static_cast<int>(intery), x, rfpart(intery));
+                set_pixel(static_cast<int>(intery) + 1, x, fpart(intery));
+            }
+        } else {
+            for (int x = xpxl1 + 1; x < xpxl2; ++x, intery += gradient) {
+                set_pixel(x, static_cast<int>(intery), rfpart(intery));
+                set_pixel(x, static_cast<int>(intery) + 1, fpart(intery));
+            }
+        }
+    }
+}
+
 extern "C" {
 
     int main() {
@@ -81,7 +203,28 @@ extern "C" {
                 }
             }
         }
+    }
 
+    void render_graph(double *weights, double *pix, int bw, int bh, bool use_mask) {
+        for (size_t i = 0; i < bw * bh; ++i)
+            pix[i] = 0;
+        for (size_t l = 0, i = 0; l < Np - 1; ++l) {
+            for (size_t m = l + 1; m < Np; ++m, ++i) {
+                if (use_mask && (!mask[l] || !mask[m]))
+                    continue;
+                if (weights[i] > 1e-2) {
+                    double a_x = 1. / (w - 1) * (l % w) * bw;
+                    double b_x = 1. / (w - 1) * (m % w) * bw;
+                    double a_y = 1. / (h - 1) * (h - 1 - l / w) * bh;
+                    double b_y = 1. / (h - 1) * (h - 1 - m / w) * bh;
+                    xiaolin_wu::draw_line(a_x, a_y, b_x, b_y,
+                        [&, w=weights[i]](size_t i, size_t j, double val) {
+                            if (i < bw && j < bh)
+                                pix[j * bw + i] = w * val + (1. - w * val) * pix[j * bw + i];
+                        });
+                }
+            }
+        }
     }
 
     void compute_bias_histo(double *biases, int *histo, bool use_mask, double radius) {
@@ -141,9 +284,6 @@ extern "C" {
 
                 if (i < 0 || j < 0)
                     continue;
-
-                // if (dist(phase_points[labels.first], phase_points[labels.second]) > radius)
-                //     continue;
 
                 L(i,j) = -w;
                 L(j,i) = -w;
