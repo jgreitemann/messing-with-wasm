@@ -2,4 +2,4 @@ Makefile
 _data/*
 _gp/*
 *.cpp
-worker.in.js
+*_worker.in.js
