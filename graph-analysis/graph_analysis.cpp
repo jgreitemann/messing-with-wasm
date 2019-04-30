@@ -220,7 +220,7 @@ extern "C" {
                     xiaolin_wu::draw_line(a_x, a_y, b_x, b_y,
                         [&, w=weights[i]](size_t i, size_t j, double val) {
                             if (i < bw && j < bh)
-                                pix[j * bw + i] += w * val;
+                                pix[j * bw + i] = w * val + (1. - w * val) * pix[j * bw + i];
                         });
                 }
             }
