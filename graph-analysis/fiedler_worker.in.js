@@ -10,7 +10,7 @@ var Module = {
         var fiedler_ptr = Module._malloc(8 * 493);
         var bitmap_ptr = Module._malloc(8 * 3 * 493);
         var min_max_step_ptr = Module._malloc(8 * 4);
-        var fiedler_histo_ptr = Module._malloc(4 * 70);
+        var fiedler_histo_ptr = Module._malloc(8 * 70);
 
         self.onmessage = function(event) {
             var msg = event.data;

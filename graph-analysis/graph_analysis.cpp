@@ -285,9 +285,6 @@ extern "C" {
                 if (i < 0 || j < 0)
                     continue;
 
-                // if (dist(phase_points[labels.first], phase_points[labels.second]) > radius)
-                //     continue;
-
                 L(i,j) = -w;
                 L(j,i) = -w;
                 L(i,i) += w;
