@@ -193,7 +193,8 @@ window.onload = function () {
     var func_math = {
         'box': document.getElementById('box-math'),
         'lorentzian': document.getElementById('lorentzian-math'),
-        'gaussian': document.getElementById('gaussian-math')
+        'gaussian': document.getElementById('gaussian-math'),
+        'half-lorentzian': document.getElementById('half-lorentzian-math')
     };
 
     function update() {

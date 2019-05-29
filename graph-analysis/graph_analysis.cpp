@@ -179,6 +179,11 @@ extern "C" {
                 return [&, gamma_sq = rhoc * rhoc](double rho) {
                     return 1. - gamma_sq / (pow(std::abs(rho) - 1., 2.) + gamma_sq);
                 };
+            } else if (func == 3) {
+                return [&, gamma_sq = rhoc * rhoc](double rho) {
+                    if (std::abs(rho) < 1) return 0.;
+                    return 1. - gamma_sq / (pow(std::abs(rho) - 1., 2.) + gamma_sq);
+                };
             } else {
                 throw std::runtime_error("unknown weight function");
             }
