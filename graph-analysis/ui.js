@@ -34,23 +34,21 @@ function redraw_graph(imageData, mask_data) {
     var canvas = document.getElementById('gnuplot_graph_canvas');
     var ctx = canvas.getContext('2d');
 
-    createImageBitmap(imageData).then(function(bitmap) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(bitmap, boundingRect.origin.x, boundingRect.origin.y);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.putImageData(imageData, boundingRect.origin.x, boundingRect.origin.y);
 
-        gnuplot_graph_canvas();
-        gnuplot.TR(204.5 * 10, 243 * 10, 0, 8, "Center", "-");
+    gnuplot_graph_canvas();
+    gnuplot.TR(204.5 * 10, 243 * 10, 0, 8, "Center", "-");
 
-        ctx.fillStyle = 'rgb(0%, 42%, 80%)';
+    ctx.fillStyle = 'rgb(0%, 42%, 80%)';
 
-        for (var i = 0; i < points.length; ++i) {
-            if (!mask_data || mask_data[i]) {
-                ctx.beginPath();
-                ctx.arc(points[i].x, points[i].y, 1, 0, 2 * Math.PI);
-                ctx.fill();
-            }
+    for (var i = 0; i < points.length; ++i) {
+        if (!mask_data || mask_data[i]) {
+            ctx.beginPath();
+            ctx.arc(points[i].x, points[i].y, 1, 0, 2 * Math.PI);
+            ctx.fill();
         }
-    });
+    }
 }
 
 function redraw_histo(bias_histo_data, weight_histo_data, curve_data) {
